@@ -1,100 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Energy Levels Simulation</title>
+    <title>Simulación de Distribución de Energía</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
-        #plotDiv {
+        #contenedor {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        #plot1, #plot2 {
+            width: 48%;
+            min-width: 300px;
+            margin-top: 20px;
+        }
+        h1, p {
+            text-align: center;
+        }
+        #boton-simular {
+            display: block;
             width: 100%;
-            max-width: 800px;
-            height: 500px;
+            max-width: 300px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px auto;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
         }
-        #tempSlider {
-            width: 80%;
-            max-width: 400px;
-            margin: 20px 0;
-        }
-        #tempValue {
-            font-size: 18px;
-            margin-bottom: 10px;
+        #boton-simular:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div id="plotDiv"></div>
-    <input type="range" id="tempSlider" min="1" max="1000" value="300">
-    <div id="tempValue">Temperature: 300 K</div>
+    <h1>Simulación de Distribución de Energía en un Sistema Unidimensional de Partículas</h1>
+    <p>Haga clic en el botón para realizar intercambios de energía.</p>
+    <button id="boton-simular">Realizar intercambios de energía</button>
+    <div id="contenedor">
+        <div id="plot1"></div>
+        <div id="plot2"></div>
+    </div>
 
     <script>
-        const k_B = 1.380649e-23; // Boltzmann constant in J/K
-        const E_max = k_B * 1000; // Maximum energy to display (J)
+        // Configuración general
+        const N = 10000;  // Número de partículas
+        const energia_inicial = 10;  // Energía inicial de cada partícula
+        const num_intercambios = 10000;  // Número de intercambios por clic
+        const num_barras = 20;  // Número de barras en el histograma
 
-        const plot = document.getElementById('plotDiv');
-        const slider = document.getElementById('tempSlider');
-        const tempValueDisplay = document.getElementById('tempValue');
+        // Inicializar energías de las partículas
+        let energias_sin_restriccion = new Array(N).fill(energia_inicial);
+        let energias_no_negativas = new Array(N).fill(energia_inicial);
 
-        function generateLevels(start, end, count, color) {
-            const levels = [];
-            const step = (end - start) / (count - 1);
-            for (let i = 0; i < count; i++) {
-                const y = start + i * step;
-                levels.push({x: [0, 1], y: [y, y], mode: 'lines', line: {color: color, width: 1}, showlegend: false});
+        // Esperar a que el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar distribución inicial
+            actualizar_histogramas();
+
+            // Capturar evento de clic en el botón
+            document.getElementById('boton-simular').addEventListener('click', simular);
+        });
+
+        // Función para simular los intercambios de energía
+        function simular() {
+            // Intercambiar energías
+            energias_sin_restriccion = intercambiar_energias_sin_restriccion(energias_sin_restriccion, num_intercambios);
+            energias_no_negativas = intercambiar_energias_no_negativas(energias_no_negativas, num_intercambios);
+
+            // Actualizar los histogramas
+            actualizar_histogramas();
+        }
+
+        // Función para actualizar los histogramas
+        function actualizar_histogramas() {
+            // Definir límites fijos
+            const min_energia = -60;
+            const max_energia = 70;
+
+            // Datos para el primer histograma (sin restricción)
+            const data1 = {
+                x: energias_sin_restriccion,
+                type: 'histogram',
+                nbinsx: num_barras,
+                xbins: { start: min_energia, end: max_energia },
+                marker: { color: 'rgba(77, 148, 255, 0.7)', line: { color: 'black', width: 0.5 } }
+            };
+
+            const layout1 = {
+                title: `Sin restricción<br>Promedio: ${mean(energias_sin_restriccion).toFixed(2)}, Mediana: ${median(energias_sin_restriccion).toFixed(2)}`,
+                xaxis: { title: 'Energía', range: [min_energia, max_energia] },
+                yaxis: { title: 'Frecuencia relativa' },
+                bargap: 0.05
+            };
+
+            Plotly.react('plot1', [data1], layout1);
+
+            // Datos para el segundo histograma (no negativas)
+            const data2 = {
+                x: energias_no_negativas,
+                type: 'histogram',
+                nbinsx: num_barras,
+                xbins: { start: 0, end: max_energia },
+                marker: { color: 'rgba(255, 153, 77, 0.7)', line: { color: 'black', width: 0.5 } }
+            };
+
+            const layout2 = {
+                title: `Energías no negativas<br>Promedio: ${mean(energias_no_negativas).toFixed(2)}, Mediana: ${median(energias_no_negativas).toFixed(2)}`,
+                xaxis: { title: 'Energía', range: [0, max_energia] },
+                yaxis: { title: 'Frecuencia relativa' },
+                bargap: 0.05
+            };
+
+            Plotly.react('plot2', [data2], layout2);
+        }
+
+        // Función para intercambiar energías sin restricción
+        function intercambiar_energias_sin_restriccion(energias, num_intercambios) {
+            const nuevas_energias = [...energias];
+            for (let i = 0; i < num_intercambios; i++) {
+                const idx1 = Math.floor(Math.random() * N);
+                let idx2 = Math.floor(Math.random() * N);
+                while (idx2 === idx1) {
+                    idx2 = Math.floor(Math.random() * N);
+                }
+                const intercambio = getRandomInt(-1, 1);
+                nuevas_energias[idx1] += intercambio;
+                nuevas_energias[idx2] -= intercambio;
             }
-            return levels;
+            return nuevas_energias;
         }
 
-        function updatePlot() {
-            const T = parseFloat(slider.value);
-            const kT = k_B * T;
-
-            const transLevels = generateLevels(0, E_max, 200, 'black');
-            const rotLevels = generateLevels(0, E_max, 50, 'red');
-            const vibLevels = generateLevels(0, E_max, 15, 'green');
-
-            const ktLine = {
-                x: [0, 1],
-                y: [kT, kT],
-                mode: 'lines',
-                line: {color: 'blue', dash: 'dash', width: 2},
-                showlegend: false
-            };
-
-            const data = [
-                ...transLevels,
-                ...rotLevels.map(level => ({...level, xaxis: 'x2', yaxis: 'y2'})),
-                ...vibLevels.map(level => ({...level, xaxis: 'x3', yaxis: 'y3'})),
-                ktLine,
-                {...ktLine, xaxis: 'x2', yaxis: 'y2'},
-                {...ktLine, xaxis: 'x3', yaxis: 'y3'}
-            ];
-
-            const layout = {
-                title: 'Energy Levels Simulation',
-                showlegend: false,
-                xaxis: {domain: [0, 0.3], title: 'Translational', showticklabels: false},
-                yaxis: {title: 'Energy (J)', range: [0, E_max]},
-                xaxis2: {domain: [0.35, 0.65], title: 'Rotational', showticklabels: false},
-                yaxis2: {title: 'Energy (J)', range: [0, E_max]},
-                xaxis3: {domain: [0.7, 1], title: 'Vibrational', showticklabels: false},
-                yaxis3: {title: 'Energy (J)', range: [0, E_max]},
-                height: 500,
-            };
-
-            Plotly.react(plot, data, layout);
-            tempValueDisplay.textContent = `Temperature: ${T.toFixed(1)} K`;
+        // Función para intercambiar energías manteniendo energías no negativas
+        function intercambiar_energias_no_negativas(energias, num_intercambios) {
+            const nuevas_energias = [...energias];
+            for (let i = 0; i < num_intercambios; i++) {
+                const idx1 = Math.floor(Math.random() * N);
+                let idx2 = Math.floor(Math.random() * N);
+                while (idx2 === idx1) {
+                    idx2 = Math.floor(Math.random() * N);
+                }
+                const intercambio = getRandomInt(-1, 1);
+                if (nuevas_energias[idx1] + intercambio >= 0 && nuevas_energias[idx2] - intercambio >= 0) {
+                    nuevas_energias[idx1] += intercambio;
+                    nuevas_energias[idx2] -= intercambio;
+                }
+            }
+            return nuevas_energias;
         }
 
-        slider.addEventListener('input', updatePlot);
-        updatePlot(); // Initial plot
+        // Funciones auxiliares
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function mean(arr) {
+            const sum = arr.reduce((a, b) => a + b, 0);
+            return sum / arr.length;
+        }
+
+        function median(arr) {
+            const sorted = arr.slice().sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            if (sorted.length % 2 === 0) {
+                return (sorted[mid - 1] + sorted[mid]) / 2;
+            } else {
+                return sorted[mid];
+            }
+        }
     </script>
 </body>
 </html>
