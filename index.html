@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación de Niveles de Energía</title>
+    <title>Energy Levels Simulation</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
@@ -16,7 +16,7 @@
         #plotDiv {
             width: 100%;
             max-width: 800px;
-            height: 600px;
+            height: 500px;
         }
         #tempSlider {
             width: 80%;
@@ -35,7 +35,9 @@
     <div id="tempValue">Temperature: 300 K</div>
 
     <script>
-        const k_B = 1.380649e-23; // Boltzmann constant
+        const k_B = 1.380649e-23; // Boltzmann constant in J/K
+        const E_max = k_B * 1000; // Maximum energy to display (J)
+
         const plot = document.getElementById('plotDiv');
         const slider = document.getElementById('tempSlider');
         const tempValueDisplay = document.getElementById('tempValue');
@@ -45,48 +47,46 @@
             const step = (end - start) / (count - 1);
             for (let i = 0; i < count; i++) {
                 const y = start + i * step;
-                levels.push({x: [0, 0.8], y: [y, y], mode: 'lines', line: {color: color}, showlegend: false});
+                levels.push({x: [0, 1], y: [y, y], mode: 'lines', line: {color: color, width: 1}, showlegend: false});
             }
             return levels;
         }
 
         function updatePlot() {
             const T = parseFloat(slider.value);
-            const kT = k_B * T * 1e20; // Scale factor for visualization
-            const E_max = 1.5;
+            const kT = k_B * T;
 
-            const transLevels = generateLevels(0, E_max, 100, 'black');
-            const rotLevels = generateLevels(0, E_max, 10, 'red');
-            const vibLevels = generateLevels(0, E_max, 3, 'green');
+            const transLevels = generateLevels(0, E_max, 200, 'black');
+            const rotLevels = generateLevels(0, E_max, 50, 'red');
+            const vibLevels = generateLevels(0, E_max, 15, 'green');
 
             const ktLine = {
-                x: [-0.5, 2.5],
+                x: [0, 1],
                 y: [kT, kT],
                 mode: 'lines',
                 line: {color: 'blue', dash: 'dash', width: 2},
-                name: 'k<sub>B</sub>T'
+                showlegend: false
             };
 
             const data = [
-                ...transLevels.map(level => ({...level, xaxis: 'x', yaxis: 'y'})),
-                ...rotLevels.map(level => ({...level, xaxis: 'x2', yaxis: 'y'})),
-                ...vibLevels.map(level => ({...level, xaxis: 'x3', yaxis: 'y'})),
-                {...ktLine, xaxis: 'x', yaxis: 'y'}
+                ...transLevels,
+                ...rotLevels.map(level => ({...level, xaxis: 'x2', yaxis: 'y2'})),
+                ...vibLevels.map(level => ({...level, xaxis: 'x3', yaxis: 'y3'})),
+                ktLine,
+                {...ktLine, xaxis: 'x2', yaxis: 'y2'},
+                {...ktLine, xaxis: 'x3', yaxis: 'y3'}
             ];
 
             const layout = {
-                title: 'Energy Levels and k<sub>B</sub>T',
+                title: 'Energy Levels Simulation',
                 showlegend: false,
                 xaxis: {domain: [0, 0.3], title: 'Translational', showticklabels: false},
+                yaxis: {title: 'Energy (J)', range: [0, E_max]},
                 xaxis2: {domain: [0.35, 0.65], title: 'Rotational', showticklabels: false},
+                yaxis2: {title: 'Energy (J)', range: [0, E_max]},
                 xaxis3: {domain: [0.7, 1], title: 'Vibrational', showticklabels: false},
-                yaxis: {title: 'Energy', range: [0, E_max]},
-                height: 600,
-                annotations: [
-                    {x: 0.15, y: 1.05, xref: 'paper', yref: 'paper', text: 'Translational', showarrow: false},
-                    {x: 0.5, y: 1.05, xref: 'paper', yref: 'paper', text: 'Rotational', showarrow: false},
-                    {x: 0.85, y: 1.05, xref: 'paper', yref: 'paper', text: 'Vibrational', showarrow: false}
-                ]
+                yaxis3: {title: 'Energy (J)', range: [0, E_max]},
+                height: 500,
             };
 
             Plotly.react(plot, data, layout);
