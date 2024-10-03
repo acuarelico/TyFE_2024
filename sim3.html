@@ -27,7 +27,8 @@
     margin-bottom: 10px;
   }
   #slider {
-    width: 300px;
+    width: 80%; /* Ajustar el ancho del slider para dispositivos móviles */
+    max-width: 300px;
   }
 </style>
 </head>
@@ -35,13 +36,13 @@
 
 <h1 style="text-align:center;">Simulación de Distribución de Energía</h1>
 
+<div id="container">
+  <canvas id="energyCanvas"></canvas>
+</div>
+
 <div id="controls">
   <div id="temperatureLabel">Temperatura (T): 300 K</div>
   <input type="range" id="slider" min="1" max="14.5" value="6.69" step="0.01">
-</div>
-
-<div id="container">
-  <canvas id="energyCanvas"></canvas>
 </div>
 
 <script>
@@ -190,15 +191,14 @@
     ctx.lineTo(rightEdge, kBT_y);
     ctx.stroke();
 
-    // Añadir etiqueta "kBT" alineada horizontalmente con la línea azul
+    // Añadir etiqueta "kBT" pegada a la línea azul pero sin superponerla
     ctx.fillStyle = 'blue';
     ctx.font = '16px Arial';
     ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle'; // Alinear verticalmente el texto al centro
 
-    // Posicionar la etiqueta justo a la izquierda de la línea azul y alineada verticalmente
+    // Posicionar la etiqueta justo a la izquierda de la línea azul y alineada horizontalmente
     const labelX = leftEdge - 5;
-    ctx.fillText('kBT', labelX, kBT_y);
+    ctx.fillText('kBT', labelX, kBT_y + 5);
 
     // Calcular probabilidades de Boltzmann y distribuir partículas para cada región
     plotRegions.forEach(region => {
