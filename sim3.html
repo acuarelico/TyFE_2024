@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Simulación de Distribución de Energía</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+  }
+  #container {
+    text-align: center;
+    margin-top: 20px;
+  }
+  #energyCanvas {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    width: 100%; /* Hacer que el canvas ocupe el 100% del ancho disponible */
+    height: auto;
+  }
+  #controls {
+    text-align: center;
+    margin-top: 20px;
+  }
+  #temperatureLabel {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  #slider {
+    width: 300px;
+  }
+</style>
+</head>
+<body>
+
+<h1 style="text-align:center;">Simulación de Distribución de Energía</h1>
+
+<div id="controls">
+  <div id="temperatureLabel">Temperatura (T): 300 K</div>
+  <input type="range" id="slider" min="1" max="14.5" value="6.69" step="0.01">
+</div>
+
+<div id="container">
+  <canvas id="energyCanvas"></canvas>
+</div>
+
+<script>
+  // Parámetros globales
+  const numParticles = 500;
+  const kB = 1.380649e-23; // Constante de Boltzmann (J/K)
+  const T_min = 1; // Temperatura mínima en Kelvin
+  const T_max = 3000; // Temperatura máxima en Kelvin
+  const T_ref = 300; // Temperatura de referencia para los niveles de energía
+  const E_level_max = 10.2 * kB * T_ref; // Máxima energía a representar (10.2 kBT_ref)
+
+  // Niveles de energía para cada modo (en unidades de kB * T_ref)
+  const E_max = 50 * kB * T_ref;
+
+  // Generar niveles de energía
+  const E_trans = generateEnergyLevels(E_max, 100);
+  const E_rot = generateEnergyLevels(E_max, 30);
+  const E_vib = generateEnergyLevels(E_max, 10);
+
+  // Generar colores para las partículas
+  const colors = generateColors(numParticles);
+
+  // Obtener referencias a los elementos del DOM
+  const slider = document.getElementById('slider');
+  const temperatureLabel = document.getElementById('temperatureLabel');
+  const canvas = document.getElementById('energyCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Definir regiones para cada gráfico
+  let plotRegions = [];
+
+  // Margen interno para niveles y partículas
+  const innerMargin = 20; // Margen interno para niveles de energía y partículas
+
+  // Inicializar y actualizar gráficos
+  initializeCanvas();
+  initializePlot();
+  updatePlot(Math.pow(parseFloat(slider.value), 3));
+
+  // Añadir eventos
+  slider.addEventListener('input', function() {
+    const sliderValue = parseFloat(slider.value);
+    const T = Math.pow(sliderValue, 3);
+    temperatureLabel.textContent = `Temperatura (T): ${T.toFixed(1)} K`;
+    updatePlot(T);
+  });
+
+  window.addEventListener('resize', function() {
+    initializeCanvas();
+    initializePlot();
+    updatePlot(Math.pow(parseFloat(slider.value), 3));
+  });
+
+  function initializeCanvas() {
+    // Ajustar el tamaño del canvas al contenedor
+    canvas.width = document.getElementById('container').clientWidth;
+    canvas.height = 400; // Puedes ajustar la altura según tus necesidades
+
+    // Definir márgenes y espacios
+    const margin = 60; // Márgenes laterales (espacio para el texto "kBT")
+    const interRegionSpacing = 20; // Espacio entre regiones
+
+    // Ajustar las regiones para dejar espacio en blanco entre ellas
+    const totalRegionWidth = canvas.width - 2 * margin - 2 * interRegionSpacing;
+    const regionWidth = totalRegionWidth / 3;
+
+    plotRegions = [
+      { xStart: margin, xEnd: margin + regionWidth, title: 'Translacional', E_levels: E_trans },
+      { xStart: margin + regionWidth + interRegionSpacing, xEnd: margin + 2 * regionWidth + interRegionSpacing, title: 'Rotacional', E_levels: E_rot },
+      { xStart: margin + 2 * (regionWidth + interRegionSpacing), xEnd: margin + 3 * regionWidth + 2 * interRegionSpacing, title: 'Vibracional', E_levels: E_vib }
+    ];
+  }
+
+  function generateEnergyLevels(E_max, points) {
+    const E = [];
+    for (let i = 0; i < points; i++) {
+      const xi = i * Math.sqrt(E_max) / (points - 1);
+      E.push(xi * xi);
+    }
+    return E;
+  }
+
+  function generateColors(num) {
+    const colors = [];
+    for (let i = 0; i < num; i++) {
+      const r = Math.random() * 255;
+      const g = Math.random() * 255;
+      const b = Math.random() * 255;
+      colors.push(`rgba(${r},${g},${b},0.5)`);
+    }
+    return colors;
+  }
+
+  function initializePlot() {
+    // Limpiar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Fondo blanco
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar títulos y líneas de niveles de energía para cada región
+    plotRegions.forEach(region => {
+      const { xStart, xEnd, title, E_levels } = region;
+      const centerX = xStart + (xEnd - xStart) / 2;
+
+      // Título
+      ctx.fillStyle = '#000';
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, centerX, 30);
+
+      // Dibujar líneas de niveles de energía
+      for (let i = 0; i < E_levels.length; i++) {
+        if (E_levels[i] <= E_level_max) {
+          const y = mapEnergyToY(E_levels[i]);
+          if (y <= canvas.height - 50) {
+            ctx.strokeStyle = '#ccc';
+            ctx.beginPath();
+            ctx.moveTo(xStart + innerMargin, y);
+            ctx.lineTo(xEnd - innerMargin, y);
+            ctx.stroke();
+          }
+        }
+      }
+    });
+  }
+
+  function updatePlot(T) {
+    // Limpiar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Redibujar fondo y niveles de energía
+    initializePlot();
+
+    // Calcular los bordes izquierdo y derecho para la línea azul
+    const leftEdge = plotRegions[0].xStart + innerMargin;
+    const rightEdge = plotRegions[2].xEnd - innerMargin;
+
+    // Dibujar línea de kB*T ajustada
+    const kBT_y = mapEnergyToY(kB * T);
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(leftEdge, kBT_y);
+    ctx.lineTo(rightEdge, kBT_y);
+    ctx.stroke();
+
+    // Añadir etiqueta "kBT" alineada horizontalmente con la línea azul
+    ctx.fillStyle = 'blue';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle'; // Alinear verticalmente el texto al centro
+
+    // Posicionar la etiqueta justo a la izquierda de la línea azul y alineada verticalmente
+    const labelX = leftEdge - 5;
+    ctx.fillText('kBT', labelX, kBT_y);
+
+    // Calcular probabilidades de Boltzmann y distribuir partículas para cada región
+    plotRegions.forEach(region => {
+      const { xStart, xEnd, E_levels } = region;
+
+      const P = boltzmannDistribution(E_levels, kB, T);
+      const particles = distributeParticles(numParticles, P);
+      const E_avg = averageEnergy(E_levels, particles) / (kB * T);
+
+      // Dibujar partículas
+      drawParticles(ctx, E_levels, particles, colors, E_avg, T, xStart, xEnd);
+
+      // Mostrar energía promedio
+      ctx.fillStyle = '#000';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Energía Promedio: ${E_avg.toFixed(2)} kBT`, xStart + (xEnd - xStart) / 2, canvas.height - 20);
+    });
+  }
+
+  function boltzmannDistribution(E, kB, T) {
+    const P = E.map(e => Math.exp(-e / (kB * T)));
+    const sumP = P.reduce((a, b) => a + b, 0);
+    return P.map(p => p / sumP);
+  }
+
+  function distributeParticles(numParticles, P) {
+    const cumP = [];
+    P.reduce((a, b, i) => cumP[i] = a + b, 0);
+    const particles = [];
+    for (let i = 0; i < numParticles; i++) {
+      const r = Math.random();
+      const index = cumP.findIndex(c => c >= r);
+      particles.push(index);
+    }
+    return particles;
+  }
+
+  function averageEnergy(E_levels, particles) {
+    const energies = particles.map(p => E_levels[p]);
+    const avgE = energies.reduce((a, b) => a + b, 0) / energies.length;
+    return avgE;
+  }
+
+  function drawParticles(ctx, E_levels, particles, colors, E_avg, T, xStart, xEnd) {
+    // Dibujar partículas en niveles de energía <= 10.2 * kB * T_ref
+    for (let i = 0; i < particles.length; i++) {
+      const energy = E_levels[particles[i]];
+      if (energy <= E_level_max) {
+        const x = Math.random() * (xEnd - xStart - 2 * innerMargin) + xStart + innerMargin;
+        const y = mapEnergyToY(energy);
+        if (y <= canvas.height - 50) {
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.beginPath();
+          ctx.arc(x, y, 3, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  function mapEnergyToY(energy) {
+    const maxY = canvas.height - 50; // Dejar espacio inferior
+    const minY = 50; // Dejar espacio superior
+    const maxEnergy = E_level_max; // Máxima energía a representar
+    return maxY - (energy / maxEnergy) * (maxY - minY);
+  }
+</script>
+
+</body>
+</html>
