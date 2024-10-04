@@ -15,7 +15,7 @@
   #energyCanvas {
     border: 1px solid #ccc;
     background-color: #fff;
-    width: 100%; /* Hacer que el canvas ocupe el 100% del ancho disponible */
+    width: 100%;
     height: auto;
   }
   #controls {
@@ -27,7 +27,7 @@
     margin-bottom: 10px;
   }
   #slider {
-    width: 80%; /* Ajustar el ancho del slider para dispositivos móviles */
+    width: 80%;
     max-width: 300px;
   }
 </style>
@@ -51,8 +51,8 @@
   const kB = 1.380649e-23; // Constante de Boltzmann (J/K)
   const T_min = 1; // Temperatura mínima en Kelvin
   const T_max = 3000; // Temperatura máxima en Kelvin
-  const T_ref = 300; // Temperatura de referencia para los niveles de energía
-  const E_level_max = 9.5 * kB * T_ref; // Máxima energía a representar (10.2 kBT_ref)
+  const T_ref = 300; // Temperatura de referencia
+  const E_level_max = 9.5 * kB * T_ref; // Máxima energía a representar
 
   // Niveles de energía para cada modo (en unidades de kB * T_ref)
   const E_max = 50 * kB * T_ref;
@@ -61,9 +61,6 @@
   const E_trans = generateEnergyLevels(E_max, 99);
   const E_rot = generateEnergyLevels(E_max, 15);
   const E_vib = generateEnergyLevels(E_max, 8);
-
-  // Generar colores para las partículas
-  const colors = generateColors(numParticles);
 
   // Obtener referencias a los elementos del DOM
   const slider = document.getElementById('slider');
@@ -75,7 +72,7 @@
   let plotRegions = [];
 
   // Margen interno para niveles y partículas
-  const innerMargin = 20; // Margen interno para niveles de energía y partículas
+  const innerMargin = 20;
 
   // Inicializar y actualizar gráficos
   initializeCanvas();
@@ -99,11 +96,11 @@
   function initializeCanvas() {
     // Ajustar el tamaño del canvas al contenedor
     canvas.width = document.getElementById('container').clientWidth;
-    canvas.height = 400; // Puedes ajustar la altura según tus necesidades
+    canvas.height = 400;
 
     // Definir márgenes y espacios
-    const margin = 60; // Márgenes laterales (espacio para el texto "kBT")
-    const interRegionSpacing = 20; // Espacio entre regiones
+    const margin = 60;
+    const interRegionSpacing = 20;
 
     // Ajustar las regiones para dejar espacio en blanco entre ellas
     const totalRegionWidth = canvas.width - 2 * margin - 2 * interRegionSpacing;
@@ -123,17 +120,6 @@
       E.push(xi * xi);
     }
     return E;
-  }
-
-  function generateColors(num) {
-    const colors = [];
-    for (let i = 0; i < num; i++) {
-      const r = Math.random() * 255;
-      const g = Math.random() * 255;
-      const b = Math.random() * 255;
-      colors.push(`rgba(${r},${g},${b},0.5)`);
-    }
-    return colors;
   }
 
   function initializePlot() {
@@ -195,8 +181,6 @@
     ctx.fillStyle = 'blue';
     ctx.font = '16px Arial';
     ctx.textAlign = 'right';
-
-    // Posicionar la etiqueta justo a la izquierda de la línea azul y alineada horizontalmente
     const labelX = leftEdge - 5;
     ctx.fillText('kBT', labelX, kBT_y + 5);
 
@@ -209,7 +193,7 @@
       const E_avg = averageEnergy(E_levels, particles) / (kB * T);
 
       // Dibujar partículas
-      drawParticles(ctx, E_levels, particles, colors, E_avg, T, xStart, xEnd);
+      drawParticles(ctx, E_levels, particles, xStart, xEnd, T);
 
       // Mostrar energía promedio
       ctx.fillStyle = '#000';
@@ -243,21 +227,38 @@
     return avgE;
   }
 
-  function drawParticles(ctx, E_levels, particles, colors, E_avg, T, xStart, xEnd) {
-    // Dibujar partículas en niveles de energía <= 10.2 * kB * T_ref
+  function drawParticles(ctx, E_levels, particles, xStart, xEnd, T) {
     for (let i = 0; i < particles.length; i++) {
       const energy = E_levels[particles[i]];
       if (energy <= E_level_max) {
         const x = Math.random() * (xEnd - xStart - 2 * innerMargin) + xStart + innerMargin;
         const y = mapEnergyToY(energy);
         if (y <= canvas.height - 50) {
-          ctx.fillStyle = colors[i % colors.length];
+          // Calcular el color según la energía
+          const color = energyToColor(energy);
+          ctx.fillStyle = color;
           ctx.beginPath();
           ctx.arc(x, y, 3, 0, 2 * Math.PI);
           ctx.fill();
         }
       }
     }
+  }
+
+  function energyToColor(energy) {
+    // Mapear la energía a un valor entre 0 y 1
+    const ratio = energy / E_level_max;
+
+    // Colores de inicio y fin en formato RGB
+    const startColor = [85, 158, 218]; // Azul claro (#559EDA)
+    const endColor = [245, 133, 191];  // Rosa suave (#F585BF)
+
+    // Interpolar entre los colores
+    const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
+    const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
+    const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
+
+    return `rgb(${r}, ${g}, ${b})`;
   }
 
   function mapEnergyToY(energy) {
