@@ -36,9 +36,21 @@
         /* Ajustar alturas de los gráficos */
         #cv-plot {
             height: 300px;
+            /* cursor: default; */ /* Este estilo no es suficiente */
         }
         #energy-levels {
             height: 300px;
+        }
+        /* Sobrescribir el estilo del cursor en los elementos internos de Plotly */
+        #cv-plot .cursor-crosshair,
+        #cv-plot .cursor-pointer,
+        #cv-plot .hoverlayer,
+        #cv-plot .draglayer,
+        #cv-plot .drag {
+            cursor: default !important;
+        }
+        #cv-plot .modebar {
+            display: none !important;
         }
         /* Contenedor del slider y el checkbox */
         #slider-container {
@@ -221,23 +233,24 @@
         ];
 
         let layoutCv = {
-            hovermode: false, // Añadido para desactivar el hover
+            hovermode: false,
+            dragmode: 'none', // Desactiva el arrastre y el cursor de cruz
             xaxis: {
                 type: 'log',
                 title: 'Temperatura (K)',
                 range: [-1, 4],
                 automargin: true,
                 showgrid: false,
-                fixedrange: true // Añadido para deshabilitar zoom en el eje x
+                fixedrange: true // Deshabilita zoom en eje x
             },
             yaxis: {
                 title: 'C<sub>V</sub>',
                 range: [0, 4],
                 automargin: true,
                 showgrid: false,
-                tickvals: [],         // Ocultar los valores del eje y
-                showticklabels: false, // Ocultar las etiquetas del eje y
-                fixedrange: true      // Añadido para deshabilitar zoom en el eje y
+                tickvals: [],
+                showticklabels: false,
+                fixedrange: true // Deshabilita zoom en eje y
             },
             margin: plotMargins,
             shapes: horizontal_lines,
@@ -249,7 +262,7 @@
                     yref: 'y',
                     text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
                     showarrow: false,
-                    font: { size: 14 },
+                    font: { size: 12 },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 },
@@ -260,7 +273,7 @@
                     yref: 'y',
                     text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
                     showarrow: false,
-                    font: { size: 14 },
+                    font: { size: 12 },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 },
@@ -271,7 +284,7 @@
                     yref: 'y',
                     text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
                     showarrow: false,
-                    font: { size: 14 },
+                    font: { size: 12 },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 }
@@ -322,7 +335,7 @@
         let E_current_max = E_fixed_max; // Variable para almacenar el E_max actual
 
         // Partículas
-        const num_particles = 150;
+        const num_particles = 300; // Aumenté el número de partículas para mejor representación
         let particles = [];
 
         // Variables globales
@@ -345,8 +358,11 @@
                 .domain([0, 3])
                 .range([marginLeft, width - marginRight]);
 
+            // Añadir un margen superior para evitar que los niveles y partículas se salgan del gráfico
+            const yMaxWithMargin = E_max * 1.2;
+
             yScale = d3.scaleLinear()
-                .domain([0, E_max])
+                .domain([0, yMaxWithMargin])
                 .range([height - 30, 30]);
         }
 
@@ -359,7 +375,7 @@
 
         function updateEnergyLevels() {
             const beta = 1 / (kB * currentT);
-            const threshold = 1e-5;
+            const threshold = 1e-8; // Reducir el umbral para considerar niveles superiores
 
             let P_trans = En_trans.map(E => Math.exp(-beta * E));
             let Z_trans = P_trans.reduce((a, b) => a + b, 0);
@@ -427,19 +443,22 @@
 
             function drawLevels(En, start, max_plot) {
                 for (let n = 0; n < max_plot; n++) {
-                    svg.append('line')
-                        .attr('class', 'energy-level')
-                        .attr('x1', xScale(start))
-                        .attr('x2', xScale(start + groupWidth))
-                        .attr('y1', yScale(En[n]))
-                        .attr('y2', yScale(En[n]))
-                        .attr('stroke', 'gray')
-                        .attr('stroke-width', 0.5);
+                    let yPosition = yScale(En[n]);
+                    if (yPosition >= 30) {
+                        svg.append('line')
+                            .attr('class', 'energy-level')
+                            .attr('x1', xScale(start))
+                            .attr('x2', xScale(start + groupWidth))
+                            .attr('y1', yPosition)
+                            .attr('y2', yPosition)
+                            .attr('stroke', 'gray')
+                            .attr('stroke-width', 0.5);
+                    }
                 }
             }
 
             const beta = 1 / (kB * currentT);
-            const threshold = 1e-5;
+            const threshold = 1e-8;
 
             let P_trans = En_trans.map(E => Math.exp(-beta * E));
             let Z_trans = P_trans.reduce((a, b) => a + b, 0);
@@ -454,38 +473,40 @@
             let Z_vib = P_vib.reduce((a, b) => a + b, 0);
             P_vib = P_vib.map(p => p / Z_vib);
 
-            let n_trans_max_plot = En_trans.findIndex(E => E > E_max);
+            let n_trans_max_plot = En_trans.findIndex(E => E > yScale.domain()[1]);
             if (n_trans_max_plot === -1) n_trans_max_plot = En_trans.length;
             drawLevels(En_trans, xPositions[0], n_trans_max_plot);
 
-            let j_rot_max_plot = En_rot.findIndex(E => E > E_max);
+            let j_rot_max_plot = En_rot.findIndex(E => E > yScale.domain()[1]);
             if (j_rot_max_plot === -1) j_rot_max_plot = En_rot.length - 1;
             drawLevels(En_rot, xPositions[1], j_rot_max_plot + 1);
 
-            let n_vib_max_plot = En_vib.findIndex(E => E > E_max);
+            let n_vib_max_plot = En_vib.findIndex(E => E > yScale.domain()[1]);
             if (n_vib_max_plot === -1) n_vib_max_plot = En_vib.length - 1;
             drawLevels(En_vib, xPositions[2], n_vib_max_plot + 1);
 
             svg.selectAll('.label').remove();
 
+            // Ajustar la posición de las etiquetas si es necesario
+            const labelYPosition = yScale.range()[1] + 15; // Un poco por debajo del límite superior
             svg.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[0] + groupWidth / 2))
-                .attr('y', yScale(E_max * 0.98))
+                .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Traslacional (T)');
 
             svg.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[1] + groupWidth / 2))
-                .attr('y', yScale(E_max * 0.98))
+                .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Rotacional (R)');
 
             svg.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[2] + groupWidth / 2))
-                .attr('y', yScale(E_max * 0.98))
+                .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Vibracional (V)');
 
@@ -538,9 +559,10 @@
                 for (let i = 0; i < num; i++) {
                     let level = weightedRandom(P);
                     let energy = En[level];
-                    if (energy <= yScale.domain()[1]) {
+                    let yPosition = yScale(energy);
+                    if (yPosition >= 30) {
                         let x = xScale(xStart + Math.random() * groupWidth);
-                        let y = yScale(energy);
+                        let y = yPosition;
                         let color = energyToColor(energy, yScale.domain()[1]);
 
                         let particle = svg.append('circle')
