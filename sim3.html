@@ -88,7 +88,7 @@
 <body>
     <h1>capacidad calorifica por partícula</h1>
     <!-- Texto de temperatura actual -->
-    <div id="temp-value">T = 300 K</div>
+    <div id="temp-value">T = 1 K</div>
     <!-- Contenedor de los gráficos -->
     <div id="plots">
         <div id="cv-plot"></div>
@@ -96,7 +96,7 @@
     </div>
     <!-- Contenedor del slider y el checkbox -->
     <div id="slider-container">
-        <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="2.47712125472">
+        <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
         <div id="auto-scale-container">
             <input type="checkbox" id="auto-scale-checkbox" checked>
             <label for="auto-scale-checkbox">Autoescalado</label>
@@ -189,7 +189,8 @@
             type: 'scatter',
             mode: 'lines',
             line: { color: 'black', width: 2 },
-            name: 'C<sub>V</sub>'
+            name: 'C<sub>V</sub>',
+            hoverinfo: 'skip' // Añadido para ocultar las etiquetas al pasar el ratón
         };
 
         let horizontal_lines = [
@@ -220,12 +221,14 @@
         ];
 
         let layoutCv = {
+            hovermode: false, // Añadido para desactivar el hover
             xaxis: {
                 type: 'log',
                 title: 'Temperatura (K)',
                 range: [-1, 4],
                 automargin: true,
-                showgrid: false
+                showgrid: false,
+                fixedrange: true // Añadido para deshabilitar zoom en el eje x
             },
             yaxis: {
                 title: 'C<sub>V</sub>',
@@ -233,7 +236,8 @@
                 automargin: true,
                 showgrid: false,
                 tickvals: [],         // Ocultar los valores del eje y
-                showticklabels: false // Ocultar las etiquetas del eje y
+                showticklabels: false, // Ocultar las etiquetas del eje y
+                fixedrange: true      // Añadido para deshabilitar zoom en el eje y
             },
             margin: plotMargins,
             shapes: horizontal_lines,
@@ -243,9 +247,9 @@
                     y: 3.5,
                     xref: 'paper',
                     yref: 'y',
-                    text: '7/2 K<sub>B</sub>   (T+R+V activos)',
+                    text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
                     showarrow: false,
-                    font: { size: 10 },
+                    font: { size: 12 },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 },
@@ -254,9 +258,9 @@
                     y: 2.5,
                     xref: 'paper',
                     yref: 'y',
-                    text: '5/2 K<sub>B</sub>   (T+R activos)',
+                    text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
                     showarrow: false,
-                    font: { size: 10 },
+                    font: { size: 12 },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 },
@@ -265,9 +269,9 @@
                     y: 1.5,
                     xref: 'paper',
                     yref: 'y',
-                    text: '3/2 K<sub>B</sub>   (T activos)',
+                    text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
                     showarrow: false,
-                    font: { size: 10 },
+                    font: { size: 12 },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 }
@@ -275,7 +279,8 @@
         };
 
         let configCv = {
-            responsive: true
+            responsive: true,
+            displayModeBar: false // Añadido para ocultar la barra de herramientas de Plotly
         };
 
         Plotly.newPlot('cv-plot', [traceCv], layoutCv, configCv);
@@ -312,7 +317,7 @@
         let xScale, yScale;
 
         // Variables para E_max
-        const E_initial_max = 5e-22;
+        const E_initial_max = 1e-22;
         let E_fixed_max = 1.36e-19;
         let E_current_max = E_fixed_max; // Variable para almacenar el E_max actual
 
@@ -321,7 +326,7 @@
         let particles = [];
 
         // Variables globales
-        let currentT = 300; // Temperatura actual
+        let currentT = 1; // Temperatura actual
 
         function updateScales(E_max) {
             const plotWidth = document.getElementById('cv-plot').clientWidth;
@@ -586,7 +591,12 @@
                 // Fijar E_current_max al valor actual de E_max
                 E_fixed_max = E_current_max;
             }
-            updateEnergyLevels(); // Actualizar solo escalas y niveles de energía
+            updateEnergyLevels(); // Actualizar escalas y niveles de energía
+
+            if (autoScaleCheckbox.checked) {
+                updateParticles(currentT); // Re-sortear las partículas solo cuando se marca el checkbox
+            }
+            // No re-sorteamos las partículas al desmarcar el checkbox
         }
 
         tempSlider.addEventListener('input', updateTemperature);
