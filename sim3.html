@@ -36,7 +36,6 @@
         /* Ajustar alturas de los gráficos */
         #cv-plot {
             height: 300px;
-            /* cursor: default; */ /* Este estilo no es suficiente */
         }
         #energy-levels {
             height: 300px;
@@ -358,8 +357,8 @@
                 .domain([0, 3])
                 .range([marginLeft, width - marginRight]);
 
-            // Añadir un margen superior para evitar que los niveles y partículas se salgan del gráfico
-            const yMaxWithMargin = E_max * 1.2;
+            // Ajustar el rango de energía al 0.5 del actual
+            const yMaxWithMargin = E_max * 0.5;
 
             yScale = d3.scaleLinear()
                 .domain([0, yMaxWithMargin])
@@ -444,7 +443,7 @@
             function drawLevels(En, start, max_plot) {
                 for (let n = 0; n < max_plot; n++) {
                     let yPosition = yScale(En[n]);
-                    if (yPosition >= 30) {
+                    if (yPosition >= 30 && yPosition <= yScale.range()[0]) {
                         svg.append('line')
                             .attr('class', 'energy-level')
                             .attr('x1', xScale(start))
@@ -460,35 +459,24 @@
             const beta = 1 / (kB * currentT);
             const threshold = 1e-8;
 
-            let P_trans = En_trans.map(E => Math.exp(-beta * E));
-            let Z_trans = P_trans.reduce((a, b) => a + b, 0);
-            P_trans = P_trans.map(p => p / Z_trans);
-
-            let J = [...Array(j_rot_max + 1).keys()];
-            let P_rot = J.map((J_value, index) => (2 * J_value + 1) * Math.exp(-beta * En_rot[index]));
-            let Z_rot = P_rot.reduce((a, b) => a + b, 0);
-            P_rot = P_rot.map(p => p / Z_rot);
-
-            let P_vib = En_vib.map(E => Math.exp(-beta * E));
-            let Z_vib = P_vib.reduce((a, b) => a + b, 0);
-            P_vib = P_vib.map(p => p / Z_vib);
-
             let n_trans_max_plot = En_trans.findIndex(E => E > yScale.domain()[1]);
             if (n_trans_max_plot === -1) n_trans_max_plot = En_trans.length;
-            drawLevels(En_trans, xPositions[0], n_trans_max_plot);
 
             let j_rot_max_plot = En_rot.findIndex(E => E > yScale.domain()[1]);
             if (j_rot_max_plot === -1) j_rot_max_plot = En_rot.length - 1;
-            drawLevels(En_rot, xPositions[1], j_rot_max_plot + 1);
 
             let n_vib_max_plot = En_vib.findIndex(E => E > yScale.domain()[1]);
             if (n_vib_max_plot === -1) n_vib_max_plot = En_vib.length - 1;
+
+            drawLevels(En_trans, xPositions[0], n_trans_max_plot);
+            drawLevels(En_rot, xPositions[1], j_rot_max_plot + 1);
             drawLevels(En_vib, xPositions[2], n_vib_max_plot + 1);
 
             svg.selectAll('.label').remove();
 
             // Ajustar la posición de las etiquetas si es necesario
-            const labelYPosition = yScale.range()[1] + 15; // Un poco por debajo del límite superior
+            const labelYPosition = yScale.range()[1] + 15;
+
             svg.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[0] + groupWidth / 2))
@@ -515,9 +503,9 @@
             svg.append('text')
                 .attr('class', 'y-axis-label')
                 .attr('x', xScale(-0.2))
-                .attr('y', yScale(E_max / 2))
+                .attr('y', yScale(yScale.domain()[1] / 2))
                 .attr('text-anchor', 'middle')
-                .attr('transform', `rotate(-90,${xScale(-0.2)},${yScale(E_max / 2)})`)
+                .attr('transform', `rotate(-90,${xScale(-0.2)},${yScale(yScale.domain()[1] / 2)})`)
                 .text('Energía');
         }
 
@@ -560,7 +548,7 @@
                     let level = weightedRandom(P);
                     let energy = En[level];
                     let yPosition = yScale(energy);
-                    if (yPosition >= 30) {
+                    if (yPosition >= 30 && yPosition <= yScale.range()[0]) {
                         let x = xScale(xStart + Math.random() * groupWidth);
                         let y = yPosition;
                         let color = energyToColor(energy, yScale.domain()[1]);
@@ -571,7 +559,7 @@
                             .attr('cy', y)
                             .attr('r', 4)
                             .attr('fill', color);
-                        particles.push(particle);
+                        particles.push(particle); // Corrección aquí
                     }
                 }
             }
