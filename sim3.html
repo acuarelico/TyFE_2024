@@ -76,12 +76,12 @@
             position: relative;
             z-index: 1;
         }
-        /* Aumentar el área táctil alrededor del slider */
+        /* Aumentar el área táctil alrededor del slider (multiplicado por 5) */
         #temp-slider-wrapper::before {
             content: '';
             position: absolute;
-            top: -20px;
-            bottom: -20px;
+            top: -100px;   /* Incrementado para ampliar el área táctil superior */
+            bottom: -100px; /* Incrementado para ampliar el área táctil inferior */
             left: 0;
             right: 0;
         }
@@ -137,7 +137,6 @@
     </div>
 
     <script>
-        // (Todo el código JavaScript permanece igual)
         // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
@@ -582,7 +581,7 @@
                             .attr('cy', y)
                             .attr('r', 4)
                             .attr('fill', color);
-                        particles.push(particle); // Corrección aquí
+                        particles.push(particle);
                     }
                 }
             }
