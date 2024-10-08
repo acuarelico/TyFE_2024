@@ -59,12 +59,31 @@
             margin-top: 30px;
             margin-bottom: 20px;
         }
-        /* Slider de temperatura */
-        #temp-slider {
+        /* Envoltorio del slider de temperatura */
+        #temp-slider-wrapper {
             width: 60%;
             max-width: 400px;
             margin-right: 10px;
-            touch-action: none; /* Añadido para evitar el desplazamiento de la página en dispositivos móviles */
+            touch-action: none; /* Evita el desplazamiento de la página en dispositivos móviles */
+            position: relative;
+        }
+        /* Slider de temperatura */
+        #temp-slider {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            /* Aumentar el área táctil sin modificar la apariencia visual */
+            position: relative;
+            z-index: 1;
+        }
+        /* Aumentar el área táctil alrededor del slider */
+        #temp-slider-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            bottom: -20px;
+            left: 0;
+            right: 0;
         }
         /* Contenedor del checkbox de autoescalado */
         #auto-scale-container {
@@ -89,7 +108,7 @@
             #slider-container {
                 flex-direction: column;
             }
-            #temp-slider {
+            #temp-slider-wrapper {
                 width: 80%;
                 margin-right: 0;
                 margin-bottom: 10px;
@@ -108,7 +127,9 @@
     </div>
     <!-- Contenedor del slider y el checkbox -->
     <div id="slider-container">
-        <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+        <div id="temp-slider-wrapper">
+            <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+        </div>
         <div id="auto-scale-container">
             <input type="checkbox" id="auto-scale-checkbox" checked>
             <label for="auto-scale-checkbox">Autoescalado</label>
@@ -116,6 +137,7 @@
     </div>
 
     <script>
+        // (Todo el código JavaScript permanece igual)
         // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
