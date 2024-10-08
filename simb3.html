@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Capacidad Calorífica por Partícula</title>
+    <!-- Incluir Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Incluir D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Estilos generales */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+        h1 {
+            text-align: center;
+        }
+        /* Contenedor de los gráficos */
+        #plots {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        /* Gráficos */
+        #cv-plot, #energy-levels {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        /* Ajustar alturas de los gráficos */
+        #cv-plot {
+            height: 300px;
+        }
+        #energy-levels {
+            height: 300px;
+        }
+        /* Sobrescribir el estilo del cursor en los elementos internos de Plotly */
+        #cv-plot .cursor-crosshair,
+        #cv-plot .cursor-pointer,
+        #cv-plot .hoverlayer,
+        #cv-plot .draglayer,
+        #cv-plot .drag {
+            cursor: default !important;
+        }
+        #cv-plot .modebar {
+            display: none !important;
+        }
+        /* Contenedor del slider y el checkbox */
+        #slider-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        /* Envoltorio del slider de temperatura */
+        #temp-slider-wrapper {
+            width: 60%;
+            max-width: 400px;
+            margin-right: 10px;
+            touch-action: none; /* Evita el desplazamiento de la página en dispositivos móviles */
+            position: relative;
+        }
+        /* Slider de temperatura */
+        #temp-slider {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            /* Aumentar el área táctil sin modificar la apariencia visual */
+            position: relative;
+            z-index: 1;
+        }
+        /* Aumentar el área táctil alrededor del slider (multiplicado por 5) */
+        #temp-slider-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -100px;   /* Incrementado para ampliar el área táctil superior */
+            bottom: -100px; /* Incrementado para ampliar el área táctil inferior */
+            left: 0;
+            right: 0;
+        }
+        /* Contenedor del checkbox de autoescalado */
+        #auto-scale-container {
+            display: flex;
+            align-items: center;
+        }
+        #auto-scale-checkbox {
+            margin-right: 5px;
+        }
+        /* Texto de temperatura actual */
+        #temp-value {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        /* Partículas */
+        .particle {
+            pointer-events: none;
+        }
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 600px) {
+            #slider-container {
+                flex-direction: column;
+            }
+            #temp-slider-wrapper {
+                width: 80%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Capacidad Calorífica por Partícula</h1>
+    <!-- Texto de temperatura actual -->
+    <div id="temp-value">T = 1 K</div>
+    <!-- Contenedor de los gráficos -->
+    <div id="plots">
+        <div id="cv-plot"></div>
+        <div id="energy-levels"></div>
+    </div>
+    <!-- Contenedor del slider y el checkbox -->
+    <div id="slider-container">
+        <div id="temp-slider-wrapper">
+            <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+        </div>
+        <div id="auto-scale-container">
+            <input type="checkbox" id="auto-scale-checkbox" checked>
+            <label for="auto-scale-checkbox">Autoescalado</label>
+        </div>
+    </div>
+
+    <script>
+        // Constantes físicas
+        const h = 6.62607015e-34;  // Constante de Planck
+        const kB = 1.380649e-23;   // Constante de Boltzmann
+        const m = 9.1093837e-31;   // Masa del electrón
+        const L = 0.7e-7;          // Longitud de la caja
+        const I = 2.2e-46;         // Momento de inercia
+        const omega = 0.5e14;      // Frecuencia angular del oscilador armónico
+
+        // Rango de temperaturas
+        const temperatures = [];
+        for (let i = -1; i <= 4; i += 0.01) {
+            temperatures.push(Math.pow(10, i));
+        }
+
+        // Niveles de energía
+        const n_trans_max = 1000;
+        const j_rot_max = 1000;
+        const n_vib_max = 500;
+
+        const En_trans = [];
+        for (let n = 1; n <= n_trans_max; n++) {
+            En_trans.push((n * n * h * h) / (8 * m * L * L));
+        }
+
+        const En_rot = [];
+        for (let J = 0; J <= j_rot_max; J++) {
+            En_rot.push(J * (J + 1) * h * h / (2 * I));
+        }
+
+        const En_vib = [];
+        for (let n = 0; n <= n_vib_max; n++) {
+            En_vib.push(n * h * omega);
+        }
+
+        // Cálculos de energía promedio y capacidad calorífica
+        const E_avg_trans = [];
+        const E_avg_rot = [];
+        const E_avg_vib = [];
+        const Cv_total = [];
+
+        for (let i = 0; i < temperatures.length; i++) {
+            const T = temperatures[i];
+            const beta = 1 / (kB * T);
+
+            // Translacional
+            let exp_factor_trans = En_trans.map(E => Math.exp(-beta * E));
+            let Z_trans = exp_factor_trans.reduce((a, b) => a + b, 0);
+            let E_avg_t = En_trans.reduce((sum, E, index) => sum + E * exp_factor_trans[index], 0) / Z_trans;
+            E_avg_trans.push(E_avg_t);
+
+            // Rotacional (3D)
+            let J = [...Array(j_rot_max + 1).keys()];
+            let exp_factor_rot = J.map((J_value, index) => (2 * J_value + 1) * Math.exp(-beta * En_rot[index]));
+            let Z_rot = exp_factor_rot.reduce((a, b) => a + b, 0);
+            let E_avg_r = En_rot.reduce((sum, E, index) => sum + E * exp_factor_rot[index], 0) / Z_rot;
+            E_avg_rot.push(E_avg_r);
+
+            // Vibracional (1D)
+            let exp_factor_vib = En_vib.map(E => Math.exp(-beta * E));
+            let Z_vib = exp_factor_vib.reduce((a, b) => a + b, 0);
+            let E_avg_v = En_vib.reduce((sum, E, index) => sum + E * exp_factor_vib[index], 0) / Z_vib;
+            E_avg_vib.push(E_avg_v);
+        }
+
+        // Calcular Cv total
+        Cv_total.push(0);
+        for (let i = 1; i < temperatures.length; i++) {
+            let dT = temperatures[i] - temperatures[i - 1];
+            let dE_trans = E_avg_trans[i] - E_avg_trans[i - 1];
+            let dE_rot = E_avg_rot[i] - E_avg_rot[i - 1];
+            let dE_vib = E_avg_vib[i] - E_avg_vib[i - 1];
+            let Cv = (3 * dE_trans + dE_rot + dE_vib) / dT;
+            Cv_total.push(Cv / kB);
+        }
+
+        // Obtener márgenes del gráfico de Plotly
+        let plotMargins = { t: 30, l: 60, r: 20, b: 50 };  // Ajusté el margen izquierdo a 60 para mayor espacio
+
+        // Graficar Cv vs T
+        let traceCv = {
+            x: temperatures,
+            y: Cv_total,
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: 'black', width: 2 },
+            name: 'C<sub>V</sub>',
+            hoverinfo: 'skip' // Añadido para ocultar las etiquetas al pasar el ratón
+        };
+
+        let horizontal_lines = [
+            {
+                type: 'line',
+                x0: 0.1,
+                y0: 3.5,
+                x1: 10000,
+                y1: 3.5,
+                line: { dash: 'dash', width: 1, color: 'gray' }
+            },
+            {
+                type: 'line',
+                x0: 0.1,
+                y0: 2.5,
+                x1: 10000,
+                y1: 2.5,
+                line: { dash: 'dash', width: 1, color: 'gray' }
+            },
+            {
+                type: 'line',
+                x0: 0.1,
+                y0: 1.5,
+                x1: 10000,
+                y1: 1.5,
+                line: { dash: 'dash', width: 1, color: 'gray' }
+            }
+        ];
+
+        let layoutCv = {
+            hovermode: false,
+            dragmode: 'none', // Desactiva el arrastre y el cursor de cruz
+            xaxis: {
+                type: 'log',
+                title: 'Temperatura (K)',
+                range: [-1, 4],
+                automargin: true,
+                showgrid: false,
+                fixedrange: true // Deshabilita zoom en eje x
+            },
+            yaxis: {
+                title: 'C<sub>V</sub>',
+                range: [0, 4],
+                automargin: true,
+                showgrid: false,
+                tickvals: [],
+                showticklabels: false,
+                fixedrange: true // Deshabilita zoom en eje y
+            },
+            margin: plotMargins,
+            shapes: horizontal_lines,
+            annotations: [
+                {
+                    x: -0.02,
+                    y: 3.5,
+                    xref: 'paper',
+                    yref: 'y',
+                    text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
+                    showarrow: false,
+                    font: { size: 12 },
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                },
+                {
+                    x: -0.02,
+                    y: 2.5,
+                    xref: 'paper',
+                    yref: 'y',
+                    text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
+                    showarrow: false,
+                    font: { size: 12 },
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                },
+                {
+                    x: -0.02,
+                    y: 1.5,
+                    xref: 'paper',
+                    yref: 'y',
+                    text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
+                    showarrow: false,
+                    font: { size: 12 },
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                }
+            ]
+        };
+
+        let configCv = {
+            responsive: true,
+            displayModeBar: false // Añadido para ocultar la barra de herramientas de Plotly
+        };
+
+        Plotly.newPlot('cv-plot', [traceCv], layoutCv, configCv);
+
+        // Línea vertical de temperatura actual en el gráfico de Cv
+        function updateTempLine(T) {
+            let update = {
+                shapes: [
+                    ...horizontal_lines,
+                    {
+                        type: 'line',
+                        x0: T,
+                        y0: 0,
+                        x1: T,
+                        y1: 4,
+                        xref: 'x',
+                        yref: 'y',
+                        line: { color: 'red', width: 2, dash: 'dot' }
+                    }
+                ]
+            };
+            Plotly.relayout('cv-plot', update);
+        }
+
+        // Gráfico de niveles de energía y partículas
+        const energyLevelsDiv = document.getElementById('energy-levels');
+        let svg = d3.select('#energy-levels')
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .attr('preserveAspectRatio', 'xMidYMid meet');
+
+        // Escalas
+        let xScale, yScale;
+
+        // Variables para E_max
+        const E_initial_max = 1e-22;
+        let E_fixed_max = 1.36e-19;
+        let E_current_max = E_fixed_max; // Variable para almacenar el E_max actual
+
+        // Partículas
+        const num_particles = 300; // Aumenté el número de partículas para mejor representación
+        let particles = [];
+
+        // Variables globales
+        let currentT = 1; // Temperatura actual
+
+        function updateScales(E_max) {
+            const plotWidth = document.getElementById('cv-plot').clientWidth;
+            const plotHeight = 300; // Altura base del SVG
+
+            // Obtener los márgenes del gráfico de Plotly
+            const marginLeft = plotMargins.l;
+            const marginRight = plotMargins.r;
+
+            const width = plotWidth;
+            const height = plotHeight;
+
+            svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+            xScale = d3.scaleLinear()
+                .domain([0, 3])
+                .range([marginLeft, width - marginRight]);
+
+            // Ajustar el rango de energía al 0.5 del actual
+            const yMaxWithMargin = E_max * 0.5;
+
+            yScale = d3.scaleLinear()
+                .domain([0, yMaxWithMargin])
+                .range([height - 30, 30]);
+        }
+
+        function energyToColor(E, E_max) {
+            const normalized_E = E / E_max;
+            const r = Math.max(0, Math.min(1, 2 * normalized_E)) * 255;
+            const b = Math.max(0, Math.min(1, 2 * (1 - normalized_E))) * 255;
+            return `rgb(${r},0,${b})`;
+        }
+
+        function updateEnergyLevels() {
+            const beta = 1 / (kB * currentT);
+            const threshold = 1e-8; // Reducir el umbral para considerar niveles superiores
+
+            let P_trans = En_trans.map(E => Math.exp(-beta * E));
+            let Z_trans = P_trans.reduce((a, b) => a + b, 0);
+            P_trans = P_trans.map(p => p / Z_trans);
+
+            let J = [...Array(j_rot_max + 1).keys()];
+            let P_rot = J.map((J_value, index) => (2 * J_value + 1) * Math.exp(-beta * En_rot[index]));
+            let Z_rot = P_rot.reduce((a, b) => a + b, 0);
+            P_rot = P_rot.map(p => p / Z_rot);
+
+            let P_vib = En_vib.map(E => Math.exp(-beta * E));
+            let Z_vib = P_vib.reduce((a, b) => a + b, 0);
+            P_vib = P_vib.map(p => p / Z_vib);
+
+            const autoScale = document.getElementById('auto-scale-checkbox').checked;
+            let E_max;
+
+            if (autoScale) {
+                let index_trans = P_trans.findIndex(p => p < threshold);
+                if (index_trans === -1) {
+                    index_trans = P_trans.length - 1;
+                } else if (index_trans > 0) {
+                    index_trans -= 1;
+                }
+                let max_E_trans = En_trans[index_trans];
+
+                let index_rot = P_rot.findIndex(p => p < threshold);
+                if (index_rot === -1) {
+                    index_rot = P_rot.length - 1;
+                } else if (index_rot > 0) {
+                    index_rot -= 1;
+                }
+                let max_E_rot = En_rot[index_rot];
+
+                let index_vib = P_vib.findIndex(p => p < threshold);
+                if (index_vib === -1) {
+                    index_vib = P_vib.length - 1;
+                } else if (index_vib > 0) {
+                    index_vib -= 1;
+                }
+                let max_E_vib = En_vib[index_vib];
+
+                E_max = Math.max(E_initial_max, max_E_trans, max_E_rot, max_E_vib) * 1.1;
+                E_current_max = E_max; // Actualizar el E_max actual cuando el autoescalado está activo
+            } else {
+                E_max = E_current_max; // Usar el E_max fijo al desactivar el autoescalado
+            }
+
+            updateScales(E_max);
+            drawEnergyLevels(E_max);
+        }
+
+        function drawEnergyLevels(E_max) {
+            svg.selectAll('.energy-level').remove();
+
+            const totalWidth = 3;
+            const groupGap = 0.2; // Espacio entre grupos
+            const groupWidth = (totalWidth - 2 * groupGap) / 3;
+
+            const xPositions = [
+                0,                                 // Inicio del grupo translacional
+                groupWidth + groupGap,             // Inicio del grupo rotacional
+                2 * (groupWidth + groupGap)        // Inicio del grupo vibracional
+            ];
+
+            function drawLevels(En, start, max_plot) {
+                for (let n = 0; n < max_plot; n++) {
+                    let yPosition = yScale(En[n]);
+                    if (yPosition >= 30 && yPosition <= yScale.range()[0]) {
+                        svg.append('line')
+                            .attr('class', 'energy-level')
+                            .attr('x1', xScale(start))
+                            .attr('x2', xScale(start + groupWidth))
+                            .attr('y1', yPosition)
+                            .attr('y2', yPosition)
+                            .attr('stroke', 'gray')
+                            .attr('stroke-width', 0.5);
+                    }
+                }
+            }
+
+            const beta = 1 / (kB * currentT);
+            const threshold = 1e-8;
+
+            let n_trans_max_plot = En_trans.findIndex(E => E > yScale.domain()[1]);
+            if (n_trans_max_plot === -1) n_trans_max_plot = En_trans.length;
+
+            let j_rot_max_plot = En_rot.findIndex(E => E > yScale.domain()[1]);
+            if (j_rot_max_plot === -1) j_rot_max_plot = En_rot.length - 1;
+
+            let n_vib_max_plot = En_vib.findIndex(E => E > yScale.domain()[1]);
+            if (n_vib_max_plot === -1) n_vib_max_plot = En_vib.length - 1;
+
+            drawLevels(En_trans, xPositions[0], n_trans_max_plot);
+            drawLevels(En_rot, xPositions[1], j_rot_max_plot + 1);
+            drawLevels(En_vib, xPositions[2], n_vib_max_plot + 1);
+
+            svg.selectAll('.label').remove();
+
+            // Ajustar la posición de las etiquetas si es necesario
+            const labelYPosition = yScale.range()[1] + 15;
+
+            svg.append('text')
+                .attr('class', 'label')
+                .attr('x', xScale(xPositions[0] + groupWidth / 2))
+                .attr('y', labelYPosition)
+                .attr('text-anchor', 'middle')
+                .text('Traslacional (T)');
+
+            svg.append('text')
+                .attr('class', 'label')
+                .attr('x', xScale(xPositions[1] + groupWidth / 2))
+                .attr('y', labelYPosition)
+                .attr('text-anchor', 'middle')
+                .text('Rotacional (R)');
+
+            svg.append('text')
+                .attr('class', 'label')
+                .attr('x', xScale(xPositions[2] + groupWidth / 2))
+                .attr('y', labelYPosition)
+                .attr('text-anchor', 'middle')
+                .text('Vibracional (V)');
+
+            svg.selectAll('.y-axis-label').remove();
+
+            svg.append('text')
+                .attr('class', 'y-axis-label')
+                .attr('x', xScale(-0.2))
+                .attr('y', yScale(yScale.domain()[1] / 2))
+                .attr('text-anchor', 'middle')
+                .attr('transform', `rotate(-90,${xScale(-0.2)},${yScale(yScale.domain()[1] / 2)})`)
+                .text('Energía');
+        }
+
+        function updateParticles(T) {
+            currentT = T; // Actualizar la temperatura actual
+            const beta = 1 / (kB * T);
+
+            let P_trans = En_trans.map(E => Math.exp(-beta * E));
+            let Z_trans = P_trans.reduce((a, b) => a + b, 0);
+            P_trans = P_trans.map(p => p / Z_trans);
+
+            let J = [...Array(j_rot_max + 1).keys()];
+            let P_rot = J.map((J_value, index) => (2 * J_value + 1) * Math.exp(-beta * En_rot[index]));
+            let Z_rot = P_rot.reduce((a, b) => a + b, 0);
+            P_rot = P_rot.map(p => p / Z_rot);
+
+            let P_vib = En_vib.map(E => Math.exp(-beta * E));
+            let Z_vib = P_vib.reduce((a, b) => a + b, 0);
+            P_vib = P_vib.map(p => p / Z_vib);
+
+            particles.forEach(p => p.remove());
+            particles = [];
+
+            const totalWidth = 3;
+            const groupGap = 0.2; // Espacio entre grupos
+            const groupWidth = (totalWidth - 2 * groupGap) / 3;
+
+            const xPositions = [
+                0,                                 // Inicio del grupo translacional
+                groupWidth + groupGap,             // Inicio del grupo rotacional
+                2 * (groupWidth + groupGap)        // Inicio del grupo vibracional
+            ];
+
+            const particles_trans = Math.round(num_particles / 3);
+            const particles_rot = Math.round(num_particles / 3);
+            const particles_vib = num_particles - particles_trans - particles_rot;
+
+            function addParticles(P, En, xStart, num) {
+                for (let i = 0; i < num; i++) {
+                    let level = weightedRandom(P);
+                    let energy = En[level];
+                    let yPosition = yScale(energy);
+                    if (yPosition >= 30 && yPosition <= yScale.range()[0]) {
+                        let x = xScale(xStart + Math.random() * groupWidth);
+                        let y = yPosition;
+                        let color = energyToColor(energy, yScale.domain()[1]);
+
+                        let particle = svg.append('circle')
+                            .attr('class', 'particle')
+                            .attr('cx', x)
+                            .attr('cy', y)
+                            .attr('r', 4)
+                            .attr('fill', color);
+                        particles.push(particle);
+                    }
+                }
+            }
+
+            addParticles(P_trans, En_trans, xPositions[0], particles_trans);
+            addParticles(P_rot, En_rot, xPositions[1], particles_rot);
+            addParticles(P_vib, En_vib, xPositions[2], particles_vib);
+        }
+
+        function weightedRandom(prob) {
+            let sum = 0;
+            let r = Math.random();
+            for (let i = 0; i < prob.length; i++) {
+                sum += prob[i];
+                if (r <= sum) {
+                    return i;
+                }
+            }
+            return prob.length - 1;
+        }
+
+        // Controladores
+        const tempSlider = document.getElementById('temp-slider');
+        const tempValue = document.getElementById('temp-value');
+        const autoScaleCheckbox = document.getElementById('auto-scale-checkbox');
+
+        function updateTemperature() {
+            const logT = parseFloat(tempSlider.value);
+            const T = Math.pow(10, logT);
+            tempValue.innerText = `T = ${T.toFixed(2)} K`;
+
+            updateEnergyLevels();      // Actualizar escalas y niveles de energía
+            updateParticles(T);        // Actualizar partículas y temperatura
+            updateTempLine(T);         // Actualizar línea en el gráfico de Cv
+        }
+
+        function updateAutoScale() {
+            if (!autoScaleCheckbox.checked) {
+                // Fijar E_current_max al valor actual de E_max
+                E_fixed_max = E_current_max;
+            }
+            updateEnergyLevels(); // Actualizar escalas y niveles de energía
+
+            if (autoScaleCheckbox.checked) {
+                updateParticles(currentT); // Re-sortear las partículas solo cuando se marca el checkbox
+            }
+            // No re-sorteamos las partículas al desmarcar el checkbox
+        }
+
+        tempSlider.addEventListener('input', updateTemperature);
+        autoScaleCheckbox.addEventListener('change', updateAutoScale);
+
+        // Manejar redimensionamiento de ventana
+        window.addEventListener('resize', () => {
+            Plotly.Plots.resize('cv-plot');
+            updateEnergyLevels(); // Actualizar escalas y niveles de energía
+        });
+
+        // Inicializar
+        updateTemperature();
+
+    </script>
+</body>
+</html>
