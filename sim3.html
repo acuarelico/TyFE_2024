@@ -56,7 +56,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 300px;
+            margin-top: 30px;
             margin-bottom: 20px;
         }
         /* Slider de temperatura */
@@ -64,6 +64,7 @@
             width: 60%;
             max-width: 400px;
             margin-right: 10px;
+            touch-action: none; /* Añadido para evitar el desplazamiento de la página en dispositivos móviles */
         }
         /* Contenedor del checkbox de autoescalado */
         #auto-scale-container {
@@ -97,7 +98,7 @@
     </style>
 </head>
 <body>
-    <h1>capacidad calorifica por partícula</h1>
+    <h1>Capacidad Calorífica por Partícula</h1>
     <!-- Texto de temperatura actual -->
     <div id="temp-value">T = 1 K</div>
     <!-- Contenedor de los gráficos -->
