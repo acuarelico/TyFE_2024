@@ -399,7 +399,9 @@
                         y1: 4,
                         xref: 'x',
                         yref: 'y',
-                        line: { color: 'red', width: 2, dash: 'dot' }
+                        line: { color: 'red', width: 2}, 
+                        opacity: 0.5 // Aplicar transparencia aquí
+                        //line: { color: 'red', width: 2, dash: 'dot' }
                     }
                 ]
             };
@@ -455,7 +457,7 @@
             const normalized_E = E / E_max;
             const r = Math.max(0, Math.min(1, 2 * normalized_E)) * 255;
             const b = Math.max(0, Math.min(1, 2 * (1 - normalized_E))) * 255;
-            return `rgb(${r},0,${b})`;
+            return `rgba(${r},0,${b},0.5)`; // Opacidad del 50%
         }
 
         function updateEnergyLevels() {
@@ -576,7 +578,7 @@
 
                 // Posicionar el label
                 let labelX = xScale(-0.253); // Posición fija para evitar vibración
-                let labelY = yScale(E_label_energy) + 3; // Ajusta la posición vertical según sea necesario
+                let labelY = yScale(E_label_energy) -9; // Ajusta la posición vertical según sea necesario
 
                 // Agregar el texto en dos líneas con subíndice
                 let textElement = svg.append('text')
@@ -615,6 +617,27 @@
                     .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
                     .attr('fill', 'gray');
             }
+
+            // AÑADIR LA LÍNEA HORIZONTAL ROJA
+
+            // Eliminar cualquier línea existente
+            svg.selectAll('.kbt-line').remove();
+
+            // Calcular las posiciones x de inicio y fin
+            let lineLeftX = xScale(xPositions[0]); // Borde izquierdo de niveles traslacionales
+            let lineRightX = xScale(xPositions[2] + groupWidth); // Borde derecho de niveles vibracionales
+
+            // Dibujar la línea horizontal roja de rayas discontinuas
+            svg.append('line')
+                .attr('class', 'kbt-line')
+                .attr('x1', lineLeftX)
+                .attr('y1', yScale(kB * currentT))
+                .attr('x2', lineRightX)
+                .attr('y2', yScale(kB * currentT))
+                .attr('stroke', 'red')
+                .attr('stroke-width', 0.5)
+                .attr('opacity', 0.5); // Añadir transparencia
+                //.attr('stroke-dasharray', '4,2');
         }
 
         function updateParticles(T) {
@@ -717,7 +740,8 @@
                 } else {
                     E_fixed_max = 20 * kB * currentT;
                 }
-                updateEmaxLabel = false; // No actualizar el label al desactivar autoescalado
+                // Eliminamos la línea que desactivaba la actualización del label
+                // updateEmaxLabel = false;
                 updateEnergyLevels(); // Actualizar escalas y niveles de energía
             } else {
                 E_fixed_max = null; // Restablecer
