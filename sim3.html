@@ -64,7 +64,7 @@
             width: 60%;
             max-width: 400px;
             margin-right: 10px;
-            touch-action: none; /* Evita el desplazamiento de la página en dispositivos móviles */
+            touch-action: none;
             position: relative;
         }
         /* Slider de temperatura */
@@ -72,17 +72,17 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            -webkit-appearance: none; /* Elimina el estilo predeterminado en navegadores WebKit */
-            appearance: none;          /* Elimina el estilo predeterminado en otros navegadores */
-            height: 30px;              /* Aumenta la altura del slider */
-            background: transparent;   /* Hace transparente el fondo para personalizarlo */
+            -webkit-appearance: none;
+            appearance: none;
+            height: 30px;
+            background: transparent;
             position: relative;
             z-index: 1;
         }
         /* Estilo de la pista del slider */
         #temp-slider::-webkit-slider-runnable-track {
             width: 100%;
-            height: 8px; /* Altura de la pista */
+            height: 8px;
             background: #ddd;
             border-radius: 4px;
         }
@@ -104,12 +104,12 @@
         #temp-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 24px; /* Anchura del thumb */
-            height: 24px; /* Altura del thumb */
+            width: 24px;
+            height: 24px;
             background: #4CAF50;
             border-radius: 50%;
             cursor: pointer;
-            margin-top: -8px; /* Centrar el thumb verticalmente */
+            margin-top: -8px;
         }
         #temp-slider::-moz-range-thumb {
             width: 24px;
@@ -131,8 +131,8 @@
         #temp-slider-wrapper::before {
             content: '';
             position: absolute;
-            top: -100px;   /* Incrementado para ampliar el área táctil superior */
-            bottom: -100px; /* Incrementado para ampliar el área táctil inferior */
+            top: -100px;
+            bottom: -100px;
             left: 0;
             right: 0;
         }
@@ -143,6 +143,12 @@
         }
         #auto-scale-checkbox {
             margin-right: 5px;
+            width: 30px;  /* Aumentar el tamaño del checkbox */
+            height: 30px; /* Aumentar el tamaño del checkbox */
+        }
+        /* Aumentar ligeramente el tamaño del texto */
+        #auto-scale-container label {
+            font-size: 16px;
         }
         /* Texto de temperatura actual */
         #temp-value {
@@ -164,6 +170,16 @@
                 margin-right: 0;
                 margin-bottom: 10px;
             }
+        }
+        /* Estilo para el texto de E_max */
+        .e-max-label {
+            font-size: 12px;
+            font-family: monospace; /* Fuente monoespaciada */
+        }
+        /* Estilo para la flecha */
+        .e-max-arrow {
+            stroke: gray;
+            fill: gray;
         }
     </style>
 </head>
@@ -188,7 +204,6 @@
     </div>
 
     <script>
-        // (Todo el código JavaScript permanece igual)
         // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
@@ -265,7 +280,7 @@
         }
 
         // Obtener márgenes del gráfico de Plotly
-        let plotMargins = { t: 30, l: 60, r: 20, b: 50 };  // Ajusté el margen izquierdo a 60 para mayor espacio
+        let plotMargins = { t: 30, l: 60, r: 20, b: 50 };
 
         // Graficar Cv vs T
         let traceCv = {
@@ -275,7 +290,7 @@
             mode: 'lines',
             line: { color: 'black', width: 2 },
             name: 'C<sub>V</sub>',
-            hoverinfo: 'skip' // Añadido para ocultar las etiquetas al pasar el ratón
+            hoverinfo: 'skip'
         };
 
         let horizontal_lines = [
@@ -307,14 +322,14 @@
 
         let layoutCv = {
             hovermode: false,
-            dragmode: 'none', // Desactiva el arrastre y el cursor de cruz
+            dragmode: 'none',
             xaxis: {
                 type: 'log',
                 title: 'Temperatura (K)',
                 range: [-1, 4],
                 automargin: true,
                 showgrid: false,
-                fixedrange: true // Deshabilita zoom en eje x
+                fixedrange: true
             },
             yaxis: {
                 title: 'C<sub>V</sub>',
@@ -323,7 +338,7 @@
                 showgrid: false,
                 tickvals: [],
                 showticklabels: false,
-                fixedrange: true // Deshabilita zoom en eje y
+                fixedrange: true
             },
             margin: plotMargins,
             shapes: horizontal_lines,
@@ -366,7 +381,7 @@
 
         let configCv = {
             responsive: true,
-            displayModeBar: false // Añadido para ocultar la barra de herramientas de Plotly
+            displayModeBar: false
         };
 
         Plotly.newPlot('cv-plot', [traceCv], layoutCv, configCv);
@@ -402,23 +417,22 @@
         // Escalas
         let xScale, yScale;
 
-        // Variables para E_max
-        const E_initial_max = 1e-22;
-        let E_fixed_max = 1.36e-19;
-        let E_current_max = E_fixed_max; // Variable para almacenar el E_max actual
+        // Constante para E_max a T = 1 K
+        const E_max_T1K = 20 * kB * 1;
+        let E_fixed_max = null;
 
         // Partículas
-        const num_particles = 300; // Aumenté el número de partículas para mejor representación
+        const num_particles = 300;
         let particles = [];
 
         // Variables globales
         let currentT = 1; // Temperatura actual
+        let updateEmaxLabel = true; // Variable para controlar la actualización del label
 
         function updateScales(E_max) {
             const plotWidth = document.getElementById('cv-plot').clientWidth;
-            const plotHeight = 300; // Altura base del SVG
+            const plotHeight = 300;
 
-            // Obtener los márgenes del gráfico de Plotly
             const marginLeft = plotMargins.l;
             const marginRight = plotMargins.r;
 
@@ -431,11 +445,9 @@
                 .domain([0, 3])
                 .range([marginLeft, width - marginRight]);
 
-            // Ajustar el rango de energía al 0.5 del actual
-            const yMaxWithMargin = E_max * 0.5;
-
+            // Ajustar el rango de energía
             yScale = d3.scaleLinear()
-                .domain([0, yMaxWithMargin])
+                .domain([0, E_max * 0.5])
                 .range([height - 30, 30]);
         }
 
@@ -447,54 +459,20 @@
         }
 
         function updateEnergyLevels() {
-            const beta = 1 / (kB * currentT);
-            const threshold = 1e-8; // Reducir el umbral para considerar niveles superiores
-
-            let P_trans = En_trans.map(E => Math.exp(-beta * E));
-            let Z_trans = P_trans.reduce((a, b) => a + b, 0);
-            P_trans = P_trans.map(p => p / Z_trans);
-
-            let J = [...Array(j_rot_max + 1).keys()];
-            let P_rot = J.map((J_value, index) => (2 * J_value + 1) * Math.exp(-beta * En_rot[index]));
-            let Z_rot = P_rot.reduce((a, b) => a + b, 0);
-            P_rot = P_rot.map(p => p / Z_rot);
-
-            let P_vib = En_vib.map(E => Math.exp(-beta * E));
-            let Z_vib = P_vib.reduce((a, b) => a + b, 0);
-            P_vib = P_vib.map(p => p / Z_vib);
-
-            const autoScale = document.getElementById('auto-scale-checkbox').checked;
+            const autoScale = autoScaleCheckbox.checked;
             let E_max;
 
             if (autoScale) {
-                let index_trans = P_trans.findIndex(p => p < threshold);
-                if (index_trans === -1) {
-                    index_trans = P_trans.length - 1;
-                } else if (index_trans > 0) {
-                    index_trans -= 1;
+                if (currentT < 1) {
+                    // Para T < 1 K, fijamos E_max al valor de T = 1 K
+                    E_max = E_max_T1K;
+                } else {
+                    // Autoescalado activado y T >= 1 K
+                    E_max = 20 * kB * currentT;
                 }
-                let max_E_trans = En_trans[index_trans];
-
-                let index_rot = P_rot.findIndex(p => p < threshold);
-                if (index_rot === -1) {
-                    index_rot = P_rot.length - 1;
-                } else if (index_rot > 0) {
-                    index_rot -= 1;
-                }
-                let max_E_rot = En_rot[index_rot];
-
-                let index_vib = P_vib.findIndex(p => p < threshold);
-                if (index_vib === -1) {
-                    index_vib = P_vib.length - 1;
-                } else if (index_vib > 0) {
-                    index_vib -= 1;
-                }
-                let max_E_vib = En_vib[index_vib];
-
-                E_max = Math.max(E_initial_max, max_E_trans, max_E_rot, max_E_vib) * 1.1;
-                E_current_max = E_max; // Actualizar el E_max actual cuando el autoescalado está activo
             } else {
-                E_max = E_current_max; // Usar el E_max fijo al desactivar el autoescalado
+                // Autoescalado desactivado, usamos E_fixed_max
+                E_max = E_fixed_max;
             }
 
             updateScales(E_max);
@@ -509,9 +487,9 @@
             const groupWidth = (totalWidth - 2 * groupGap) / 3;
 
             const xPositions = [
-                0,                                 // Inicio del grupo translacional
-                groupWidth + groupGap,             // Inicio del grupo rotacional
-                2 * (groupWidth + groupGap)        // Inicio del grupo vibracional
+                0,
+                groupWidth + groupGap,
+                2 * (groupWidth + groupGap)
             ];
 
             function drawLevels(En, start, max_plot) {
@@ -530,9 +508,6 @@
                 }
             }
 
-            const beta = 1 / (kB * currentT);
-            const threshold = 1e-8;
-
             let n_trans_max_plot = En_trans.findIndex(E => E > yScale.domain()[1]);
             if (n_trans_max_plot === -1) n_trans_max_plot = En_trans.length;
 
@@ -548,7 +523,6 @@
 
             svg.selectAll('.label').remove();
 
-            // Ajustar la posición de las etiquetas si es necesario
             const labelYPosition = yScale.range()[1] + 15;
 
             svg.append('text')
@@ -581,12 +555,73 @@
                 .attr('text-anchor', 'middle')
                 .attr('transform', `rotate(-90,${xScale(-0.2)},${yScale(yScale.domain()[1] / 2)})`)
                 .text('Energía');
+
+            // Agregar el label de E = k_B T
+            svg.selectAll('.e-max-label').remove();
+            svg.selectAll('.e-max-arrow').remove();
+
+            if (updateEmaxLabel) {
+                // Calcular E_label_energy = kB * currentT
+                let E_label_energy = kB * currentT;
+
+                // E_label_energy en Joules, con 2 cifras significativas en notación científica
+                let E_label_energy_value = E_label_energy.toExponential(1) + 'J';
+
+                // El valor en KBT es 1 KBT
+                let E_label_energy_KBT_formatted = '= K₍B₎T';
+
+                // Texto del label en dos líneas
+                let E_label_text_line1 = E_label_energy_value;
+                let E_label_text_line2 = E_label_energy_KBT_formatted;
+
+                // Posicionar el label
+                let labelX = xScale(-0.253); // Posición fija para evitar vibración
+                let labelY = yScale(E_label_energy) + 3; // Ajusta la posición vertical según sea necesario
+
+                // Agregar el texto en dos líneas con subíndice
+                let textElement = svg.append('text')
+                    .attr('class', 'e-max-label')
+                    .attr('x', labelX)
+                    .attr('y', labelY)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', '12px')
+                    .attr('font-family', 'monospace');
+
+                textElement.append('tspan')
+                    .attr('x', labelX)
+                    .attr('dy', '0')
+                    .text(E_label_text_line1);
+
+                textElement.append('tspan')
+                    .attr('x', labelX)
+                    .attr('dy', '12') // Espacio entre líneas
+                    .html(E_label_text_line2.replace('K₍B₎T', 'K<tspan baseline-shift="sub">B</tspan>T'));
+
+                // Dibujar la flecha pequeña
+                let arrowX = labelX + 39; // Ajustar según sea necesario
+                let arrowY = labelY + 9;  // Centrar verticalmente entre las dos líneas
+
+                svg.append('line')
+                    .attr('class', 'e-max-arrow')
+                    .attr('x1', arrowX)
+                    .attr('y1', arrowY)
+                    .attr('x2', arrowX + 0)
+                    .attr('y2', arrowY)
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 0.5);
+
+                svg.append('polygon')
+                    .attr('class', 'e-max-arrow')
+                    .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
+                    .attr('fill', 'gray');
+            }
         }
 
         function updateParticles(T) {
-            currentT = T; // Actualizar la temperatura actual
+            // currentT ya se actualizó en updateTemperature
             const beta = 1 / (kB * T);
 
+            // Cálculo de probabilidades
             let P_trans = En_trans.map(E => Math.exp(-beta * E));
             let Z_trans = P_trans.reduce((a, b) => a + b, 0);
             P_trans = P_trans.map(p => p / Z_trans);
@@ -604,13 +639,13 @@
             particles = [];
 
             const totalWidth = 3;
-            const groupGap = 0.2; // Espacio entre grupos
+            const groupGap = 0.2;
             const groupWidth = (totalWidth - 2 * groupGap) / 3;
 
             const xPositions = [
-                0,                                 // Inicio del grupo translacional
-                groupWidth + groupGap,             // Inicio del grupo rotacional
-                2 * (groupWidth + groupGap)        // Inicio del grupo vibracional
+                0,
+                groupWidth + groupGap,
+                2 * (groupWidth + groupGap)
             ];
 
             const particles_trans = Math.round(num_particles / 3);
@@ -665,22 +700,31 @@
             const T = Math.pow(10, logT);
             tempValue.innerText = `T = ${T.toFixed(2)} K`;
 
+            currentT = T; // Actualizar currentT
+            updateEmaxLabel = true; // Actualizar el label al mover el slider
             updateEnergyLevels();      // Actualizar escalas y niveles de energía
             updateParticles(T);        // Actualizar partículas y temperatura
             updateTempLine(T);         // Actualizar línea en el gráfico de Cv
         }
 
         function updateAutoScale() {
-            if (!autoScaleCheckbox.checked) {
-                // Fijar E_current_max al valor actual de E_max
-                E_fixed_max = E_current_max;
-            }
-            updateEnergyLevels(); // Actualizar escalas y niveles de energía
+            const autoScale = autoScaleCheckbox.checked;
 
-            if (autoScaleCheckbox.checked) {
-                updateParticles(currentT); // Re-sortear las partículas solo cuando se marca el checkbox
+            if (!autoScale) {
+                // Capturar E_max actual como E_fixed_max
+                if (currentT < 1) {
+                    E_fixed_max = E_max_T1K;
+                } else {
+                    E_fixed_max = 20 * kB * currentT;
+                }
+                updateEmaxLabel = false; // No actualizar el label al desactivar autoescalado
+                updateEnergyLevels(); // Actualizar escalas y niveles de energía
+            } else {
+                E_fixed_max = null; // Restablecer
+                updateEmaxLabel = true; // Actualizar el label al activar autoescalado
+                updateEnergyLevels(); // Actualizar escalas y niveles de energía
+                updateParticles(currentT); // Redistribuir partículas al activar autoescalado
             }
-            // No re-sorteamos las partículas al desmarcar el checkbox
         }
 
         tempSlider.addEventListener('input', updateTemperature);
