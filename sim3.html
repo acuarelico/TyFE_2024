@@ -160,15 +160,38 @@
         .particle {
             pointer-events: none;
         }
+        /* Estilo para el texto desplegable */
+        #collapsible-text {
+            margin-top: 30px;
+            font-size: 16px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        #collapsible-text summary {
+            cursor: pointer;
+            list-style: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        #collapsible-text p {
+            margin: 0;
+            padding: 10px 0;
+            text-align: justify;
+        }
         /* Ajustes para dispositivos móviles */
         @media (max-width: 600px) {
             #slider-container {
                 flex-direction: column;
+                align-items: center;
             }
             #temp-slider-wrapper {
                 width: 80%;
                 margin-right: 0;
                 margin-bottom: 10px;
+            }
+            #collapsible-text {
+                width: 100%;
+                margin: 20px 0 0 0;
             }
         }
         /* Estilo para el texto de E_max */
@@ -202,8 +225,22 @@
             <label for="auto-scale-checkbox">Autoescalado</label>
         </div>
     </div>
+    <!-- Texto desplegable debajo del slider -->
+    <details id="collapsible-text">
+        <summary>Mostrar explicación</summary>
+        <p>
+            El gráfico superior muestra la capacidad calorífica por partícula en función de T para una partícula diatómica. El gráfico inferior muestra los niveles de energía traslacional, rotacional y vibracional. En ellos se distribuyen partículas que van ocupando los niveles energéticos en función de la probabilidad de llenado (proporcional al factor de Boltzmann).
+        </p>
+        <p>
+            A bajas temperaturas, solo los niveles traslacionales son accesibles debido a su baja separación. Para un incremento ΔT a bajas temperaturas, solo los niveles traslacionales almacenan energía y, por tanto, C<sub>V</sub> = ΔE / ΔT será bajo.
+        </p>
+        <p>
+            A medida que aumenta T, el segundo nivel rotacional empieza a hacerse accesible; por tanto, ahora también ahí podremos almacenar energía. Para un mismo incremento ΔT podremos almacenar mayor energía y, en consecuencia, C<sub>V</sub> = ΔE / ΔT aumentará. El mismo fenómeno ocurre cuando la temperatura es lo suficientemente alta para alcanzar niveles superiores de vibración.
+        </p>
+    </details>
 
     <script>
+        // (El código JavaScript permanece igual)
         // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
@@ -399,9 +436,8 @@
                         y1: 4,
                         xref: 'x',
                         yref: 'y',
-                        line: { color: 'red', width: 2}, 
+                        line: { color: 'red', width: 2},
                         opacity: 0.5 // Aplicar transparencia aquí
-                        //line: { color: 'red', width: 2, dash: 'dot' }
                     }
                 ]
             };
@@ -637,7 +673,6 @@
                 .attr('stroke', 'red')
                 .attr('stroke-width', 0.5)
                 .attr('opacity', 0.5); // Añadir transparencia
-                //.attr('stroke-dasharray', '4,2');
         }
 
         function updateParticles(T) {
@@ -740,8 +775,6 @@
                 } else {
                     E_fixed_max = 20 * kB * currentT;
                 }
-                // Eliminamos la línea que desactivaba la actualización del label
-                // updateEmaxLabel = false;
                 updateEnergyLevels(); // Actualizar escalas y niveles de energía
             } else {
                 E_fixed_max = null; // Restablecer
