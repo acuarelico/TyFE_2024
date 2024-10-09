@@ -177,6 +177,7 @@
             margin: 0;
             padding: 10px 0;
             text-align: justify;
+            font-size: 14px;
         }
         /* Ajustes para dispositivos móviles */
         @media (max-width: 600px) {
@@ -229,13 +230,15 @@
     <details id="collapsible-text">
         <summary>Mostrar explicación</summary>
         <p>
-            El gráfico superior muestra la capacidad calorífica por partícula en función de T para una partícula diatómica. El gráfico inferior muestra los niveles de energía traslacional, rotacional y vibracional. En ellos se distribuyen partículas que van ocupando los niveles energéticos en función de la probabilidad de llenado (proporcional al factor de Boltzmann).
+            El gráfico superior muestra la capacidad calorífica por partícula en función de T para una partícula diatómica. El gráfico inferior muestra los niveles de energía traslacional, rotacional y vibracional. En ellos se distribuyen partículas que van ocupando los niveles energéticos en función de la probabilidad de llenado proporcional al factor de Boltzmann exp(-BT).
         </p>
         <p>
-            A bajas temperaturas, solo los niveles traslacionales son accesibles debido a su baja separación. Para un incremento ΔT a bajas temperaturas, solo los niveles traslacionales almacenan energía y, por tanto, C<sub>V</sub> = ΔE / ΔT será bajo.
+            A bajas temperaturas, solo los niveles traslacionales son accesibles debido a su baja separación. Para un incremento ΔT a bajas temperaturas, solo los niveles traslacionales pueden almacenar más energía y, por tanto, C<sub>V</sub> = ΔE/ΔT será bajo.
         </p>
         <p>
-            A medida que aumenta T, el segundo nivel rotacional empieza a hacerse accesible; por tanto, ahora también ahí podremos almacenar energía. Para un mismo incremento ΔT podremos almacenar mayor energía y, en consecuencia, C<sub>V</sub> = ΔE / ΔT aumentará. El mismo fenómeno ocurre cuando la temperatura es lo suficientemente alta para alcanzar niveles superiores de vibración.
+            A medida que aumenta T, el segundo nivel rotacional empieza a hacerse accesible; por tanto, ahora también ahí las partículas pueden almacenar energía. Para un mismo incremento ΔT podremos almacenar mayor energía y, en consecuencia, C<sub>V</sub> = ΔE/ΔT aumentará. El mismo fenómeno ocurre cuando la temperatura es lo suficientemente alta para alcanzar niveles superiores de vibración.
+
+            A temperaturas muy altas todos los grados de libertad son accesibles para almacenar energía y por tanto C<sub>V</sub> es máxima.
         </p>
     </details>
 
