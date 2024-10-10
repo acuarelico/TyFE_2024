@@ -287,7 +287,7 @@
             </div>
         </div>
         <!-- Texto desplegable debajo del slider -->
-    <details id="collapsible-text">
+ <details id="collapsible-text">
     <summary>> Mostrar explicación</summary>
     <p>
         Esta simulación ilustra la capacidad calorífica por partícula (C<sub>V</sub>) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico.
@@ -300,13 +300,57 @@
         Gráfico inferior: Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, e<sup>-E/k<sub>B</sub>T</sup>.
     </p>
     <h3>Niveles de energía</h3>
-    <p>Los niveles de energía para cada modo se calculan como sigue:</p>
-    <ul>
-        <li>Traslacional (x3): E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)</li>
-        <li>Rotacional: E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)</li>
-        <li>Vibracional: E<sub>n</sub> = (n + ½)ℏω</li>
-    </ul>
-    <p>Donde n y J son números cuánticos, h es la constante de Planck, m es la masa, L es la longitud de la caja, I es el momento de inercio, y ω es la frecuencia angular del oscilador.</p>
+<p>Los niveles de energía para cada modo se calculan como sigue:</p>
+
+<ul>
+              <li>Traslacional: E<sub>{n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub>}</sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)
+                <br><br>
+                n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub> = números cuánticos (enteros positivos)
+                <br>h = constante de Planck
+                <br>m = 9.1093837 × 10<sup>-31</sup> kg (masa del electrón)
+                <br>L = 7 × 10<sup>-8</sup> m (longitud de la caja)
+                </li>
+
+
+    <li>Rotacional: E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)
+    <br><br>
+    J = número cuántico rotacional
+    <br>ℏ = h/2π (constante de Planck reducida)
+    <br>I = 2.2 × 10<sup>-46</sup> kg·m<sup>2</sup> (momento de inercia)
+    </li>
+
+    <br>
+
+    <li>Vibracional: E<sub>n</sub> = (n + ½)ℏω
+    <br><br>
+    n = número cuántico vibracional
+    <br>ℏ = h/2π (constante de Planck reducida)
+    <br>ω = 5 × 10<sup>13</sup> rad/s (frecuencia angular del oscilador)
+    </li>
+</ul>
+ 
+
+<p><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
+
+<ol>
+    <li>Se calcula la energía en una dimensión usando la ecuación: E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)</li>
+    <li>Este resultado se multiplica por 3 para el computo de C<sub>V</sub>, asumiendo que las componentes x, y, y z son independientes.</li>
+</ol>
+
+<p>Esta aproximación difiere del cálculo 3D riguroso, que vendría dado por:</p>
+
+<p>E<sub>n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub></sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)</p>
+
+<p>Las principales implicaciones de esta simplificación son:</p>
+
+<ul>
+    <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía, lo que reduce drásticamente el costo computacional.</li>
+    <li><strong>Visualización:</strong> La menor densidad de niveles permite una representación visual más clara y menos saturada.</li>
+    <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, donde la densidad de niveles de energía más bajos son cruciales, esta aproximación podría resultar en un C<sub>V</sub> ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
+    
+<p>A pesar de la aproximación usada, la forma general de la curva de C<sub>V</sub> y el comportamiento cualitativo del sistema se mantienen prácticamente idénticos. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
+</ul>
+
     <h3>Cálculo de C<sub>V</sub></h3>
     <p>
         C<sub>V</sub> se calcula como la derivada de la energía media respecto a la temperatura:
@@ -343,13 +387,6 @@
     <ul>
         <li><strong>Activado:</strong> La escala se ajusta con la temperatura, manteniendo visible la línea k<sub>B</sub>T.</li>
         <li><strong>Desactivado:</strong> La escala se fija, permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
-    </ul>
-    <h3>Datos de la simulación (unidades SI)</h3>
-    <ul>
-        <li>Masa del electrón = 9.1093837 × 10<sup>-31</sup> kg</li>
-        <li>Longitud de la caja = 7 × 10<sup>-8</sup> m</li>
-        <li>Momento de inercia para rotación = 2.2 × 10<sup>-46</sup> kg·m<sup>2</sup></li>
-        <li>Frecuencia angular del oscilador para vibración = 5 × 10<sup>13</sup> rad/s</li>
     </ul>
 </details>
   
