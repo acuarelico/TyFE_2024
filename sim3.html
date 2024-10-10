@@ -16,28 +16,43 @@
             font-family: Arial, sans-serif;
             background-color: #ffffff;
         }
+        /* Contenedor principal */
+        #main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative; /* Para posicionar elementos relativos a este contenedor */
+        }
+        /* Contenedor del encabezado */
+        #header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
         h1 {
             text-align: center;
+            flex: 1;
+            margin: 0;
+        }
+        /* Estilo para el icono */
+        #icono {
+            width: 150px; /* Ajusta el tamaño según tus necesidades */
+            height: auto;
+            margin-right: 10px;
         }
         /* Contenedor de los gráficos */
         #plots {
             display: flex;
             flex-direction: column;
             align-items: center;
-            max-width: 800px;
-            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
         }
         /* Gráficos */
         #cv-plot, #energy-levels {
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 20px;
-        }
-        /* Ajustar alturas de los gráficos */
-        #cv-plot {
-            height: 300px;
-        }
-        #energy-levels {
             height: 300px;
         }
         /* Sobrescribir el estilo del cursor en los elementos internos de Plotly */
@@ -56,8 +71,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 30px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap; /* Permite que los elementos se ajusten en dispositivos pequeños */
         }
         /* Envoltorio del slider de temperatura */
         #temp-slider-wrapper {
@@ -127,28 +143,16 @@
             border-radius: 50%;
             cursor: pointer;
         }
-        /* Aumentar el área táctil alrededor del slider */
-        #temp-slider-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -100px;
-            bottom: -100px;
-            left: 0;
-            right: 0;
-        }
         /* Contenedor del checkbox de autoescalado */
         #auto-scale-container {
             display: flex;
             align-items: center;
+            margin-top: 10px;
         }
         #auto-scale-checkbox {
             margin-right: 5px;
-            width: 30px;  /* Aumentar el tamaño del checkbox */
-            height: 30px; /* Aumentar el tamaño del checkbox */
-        }
-        /* Aumentar ligeramente el tamaño del texto */
-        #auto-scale-container label {
-            font-size: 16px;
+            width: 20px;  /* Tamaño del checkbox */
+            height: 20px; /* Tamaño del checkbox */
         }
         /* Texto de temperatura actual */
         #temp-value {
@@ -162,10 +166,10 @@
         }
         /* Estilo para el texto desplegable */
         #collapsible-text {
-            margin-top: 30px;
+            margin-top: 20px;
             font-size: 16px;
             max-width: 800px;
-            margin: 50px auto 0 auto;
+            margin: 20px auto 0 auto;
         }
         #collapsible-text summary {
             cursor: pointer;
@@ -181,6 +185,14 @@
         }
         /* Ajustes para dispositivos móviles */
         @media (max-width: 600px) {
+            #header {
+                flex-direction: column;
+                align-items: center;
+            }
+            #icono {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
             #slider-container {
                 flex-direction: column;
                 align-items: center;
@@ -189,6 +201,9 @@
                 width: 80%;
                 margin-right: 0;
                 margin-bottom: 10px;
+            }
+            #auto-scale-container {
+                margin-top: 10px;
             }
             #collapsible-text {
                 width: 100%;
@@ -208,27 +223,34 @@
     </style>
 </head>
 <body>
-    <h1>Capacidad Calorífica por Partícula</h1>
-    <!-- Texto de temperatura actual -->
-    <div id="temp-value">T = 1 K</div>
-    <!-- Contenedor de los gráficos -->
-    <div id="plots">
-        <div id="cv-plot"></div>
-        <div id="energy-levels"></div>
-    </div>
-    <!-- Contenedor del slider y el checkbox -->
-    <div id="slider-container">
-        <div id="temp-slider-wrapper">
-            <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+    <!-- Contenedor principal -->
+    <div id="main-container">
+        <!-- Contenedor del encabezado -->
+        <div id="header">
+            <!-- Icono a la izquierda del título -->
+            <img src="iconourjc.png" alt="Icono" id="icono">
+            <h1>Capacidad Calorífica por Partícula</h1>
         </div>
-        <div id="auto-scale-container">
-            <input type="checkbox" id="auto-scale-checkbox" checked>
-            <label for="auto-scale-checkbox">Autoescalado</label>
+        <!-- Texto de temperatura actual -->
+        <div id="temp-value">T = 1 K</div>
+        <!-- Contenedor de los gráficos -->
+        <div id="plots">
+            <div id="cv-plot"></div>
+            <div id="energy-levels"></div>
         </div>
-    </div>
-    <!-- Texto desplegable debajo del slider -->
-    <details id="collapsible-text">
-        <summary>> Mostrar explicación</summary>
+        <!-- Contenedor del slider y el checkbox -->
+        <div id="slider-container">
+            <div id="temp-slider-wrapper">
+                <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+            </div>
+            <div id="auto-scale-container">
+                <input type="checkbox" id="auto-scale-checkbox" checked>
+                <label for="auto-scale-checkbox">Autoescalado</label>
+            </div>
+        </div>
+        <!-- Texto desplegable debajo del slider -->
+        <details id="collapsible-text">
+            <summary>> Mostrar explicación</summary>
         <p>
             El gráfico superior muestra la capacidad calorífica por partícula en función de T para una partícula diatómica. El gráfico inferior muestra los niveles cuánticos de energía traslacional, rotacional y vibracional. En ellos se distribuyen partículas que van ocupando los niveles energéticos en función de la probabilidad de llenado proporcional al factor de Boltzmann exp(-BT).
         </p>
@@ -251,9 +273,9 @@ Datos simulación (SI): </p><p>
         </p><p>
     </details>
 
+
     <script>
-        // (El código JavaScript permanece igual)
-        // Constantes físicas
+              // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
         const m = 9.1093837e-31;   // Masa del electrón
@@ -449,7 +471,7 @@ Datos simulación (SI): </p><p>
                         xref: 'x',
                         yref: 'y',
                         line: { color: 'red', width: 2},
-                        opacity: 0.5 // Aplicar transparencia aquí
+                        opacity: 0.5
                     }
                 ]
             };
@@ -666,16 +688,14 @@ Datos simulación (SI): </p><p>
                     .attr('fill', 'gray');
             }
 
-            // AÑADIR LA LÍNEA HORIZONTAL ROJA
-
-            // Eliminar cualquier línea existente
+            // Añadir la línea horizontal roja
             svg.selectAll('.kbt-line').remove();
 
             // Calcular las posiciones x de inicio y fin
             let lineLeftX = xScale(xPositions[0]); // Borde izquierdo de niveles traslacionales
             let lineRightX = xScale(xPositions[2] + groupWidth); // Borde derecho de niveles vibracionales
 
-            // Dibujar la línea horizontal roja de rayas discontinuas
+            // Dibujar la línea horizontal roja
             svg.append('line')
                 .attr('class', 'kbt-line')
                 .attr('x1', lineLeftX)
@@ -684,7 +704,7 @@ Datos simulación (SI): </p><p>
                 .attr('y2', yScale(kB * currentT))
                 .attr('stroke', 'red')
                 .attr('stroke-width', 0.5)
-                .attr('opacity', 0.5); // Añadir transparencia
+                .attr('opacity', 0.5);
         }
 
         function updateParticles(T) {
