@@ -22,6 +22,7 @@
             padding: 10px;
             font-family: Arial, sans-serif;
             background-color: #ffffff;
+            overflow-x: hidden;
         }
         /* Contenedor principal */
         #main-container {
@@ -224,54 +225,6 @@
             overflow-x: auto;
             overflow-y: hidden;
         }
-        /* Ajustes para dispositivos móviles */
-        @media (max-width: 600px) {
-            #header {
-                flex-direction: column;
-                align-items: center;
-            }
-            #icono {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            #slider-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            #temp-slider-wrapper {
-                width: 80%;
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            #auto-scale-container {
-                margin-top: 15px;
-            }
-            #auto-scale-checkbox {
-                width: 40px;
-                height: 40px;
-            }
-            #auto-scale-checkbox:checked::before {
-                font-size: 24px;
-                line-height: 40px;
-            }
-            label[for="auto-scale-checkbox"] {
-                font-size: 20px;
-            }
-            #collapsible-text-container {
-                font-size: 16px;
-            }
-            #collapsible-text summary {
-                font-size: 24px !important;
-                padding: 10px 0;
-            }
-            #collapsible-text {
-                width: 100%;
-                margin: 50px 0 0 0;
-            }
-            #temp-value {
-                font-size: 16px;
-            }
-        }
         /* Estilo para el texto de E_max */
         .e-max-label {
             font-size: 12px;
@@ -281,6 +234,80 @@
         .e-max-arrow {
             stroke: gray;
             fill: gray;
+        }
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+                padding: 5px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            #header {
+                flex-direction: column;
+                align-items: center;
+            }
+            #icono {
+                margin-right: 0;
+                margin-bottom: 10px;
+                width: 100px;
+            }
+            #cv-plot, #energy-levels {
+                height: 200px;
+                margin-bottom: 10px;
+            }
+            #slider-container {
+                flex-direction: column;
+                align-items: center;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+            #temp-slider-wrapper {
+                width: 90%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            #temp-slider {
+                height: 20px;
+            }
+            #temp-slider::-webkit-slider-thumb {
+                width: 20px;
+                height: 20px;
+            }
+            #temp-slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+            }
+            #auto-scale-container {
+                margin-top: 15px;
+            }
+            #auto-scale-checkbox {
+                width: 24px;
+                height: 24px;
+            }
+            #auto-scale-checkbox:checked::before {
+                font-size: 18px;
+                line-height: 24px;
+            }
+            label[for="auto-scale-checkbox"] {
+                font-size: 14px;
+            }
+            #temp-value {
+                font-size: 14px;
+            }
+            #collapsible-text-container {
+                font-size: 14px;
+            }
+            #collapsible-text summary {
+                font-size: 16px !important;
+                padding: 5px 0;
+                margin-top: 20px;
+            }
+            #collapsible-text {
+                font-size: 12px;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
