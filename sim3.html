@@ -335,7 +335,7 @@
     <ul>
         <li>Traslacional: E<sub>{n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub>}</sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)
         <br><br>
-        n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub> = números cuánticos (enteros positivos)
+        n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub> = números cuánticos ( n ≥ 1, enteros)
         <br>h = constante de Planck
         <br>m = 9.1093837 × 10<sup>-31</sup> kg (masa del electrón)
         <br>L = 7 × 10<sup>-8</sup> m (longitud de la caja)
@@ -343,14 +343,14 @@
         <br>
         <li>Rotacional: E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)
         <br><br>
-        J = número cuántico rotacional
+        J = número cuántico rotacional (J ≥ 0, entero)
         <br>ℏ = h/2π (constante de Planck reducida)
         <br>I = 2.2 × 10<sup>-46</sup> kg·m<sup>2</sup> (momento de inercia)
         </li>
         <br>
         <li>Vibracional: E<sub>n</sub> = (n + ½)ℏω
         <br><br>
-        n = número cuántico vibracional
+        n = número cuántico vibracional (n ≥ 0, entero)
         <br>ℏ = h/2π (constante de Planck reducida)
         <br>ω = 5 × 10<sup>13</sup> rad/s (frecuencia angular del oscilador)
         </li>
@@ -376,6 +376,37 @@
     </ul>
     
     <p style="font-size: 0.9em;">A pesar de la aproximación usada, la separacion entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva C<sub>V</sub>  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
+
+<p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de C<sub>V</sub>:</strong> En esta simulación, C<sub>V</sub>= (∂⟨E⟩/∂T)<sub>V</sub> se aproxima numéricamente usando la fórmula:</p>
+
+<p style="font-size: 0.9em;">C<sub>V</sub> = (1 / k<sub>B</sub>) * (3 * ΔE<sub>trans</sub> + ΔE<sub>rot</sub> + ΔE<sub>vib</sub>) / ΔT</p>
+
+<p style="font-size: 0.9em;">Donde:</p>
+<ul style="font-size: 0.9em;">
+    <li>k<sub>B</sub> es la constante de Boltzmann</li>
+    <li>ΔE = E[i] - E[i-1] (cambio en la energía promedio computado para cada modo (traslacional, rotacional, vibracional) )</li>
+    <li>ΔT = T[i] - T[i-1] (cambio en la temperatura)</li>
+    <li>i representa el índice de la temperatura actual en el array de temperaturas</li>
+</ul>
+
+<p style="font-size: 0.9em;">Los promedios de energía para cada modo (traslacional, rotacional, vibracional) se calculan utilizando la distribución de Boltzmann:</p>
+
+<p style="font-size: 0.9em;">E<sub>promedio</sub> = Σ(E<sub>n</sub> * exp(-E<sub>n</sub>/(k<sub>B</sub>T))) / Σ(exp(-E<sub>n</sub>/(k<sub>B</sub>T)))</p>
+
+<p style="font-size: 0.9em;">Donde E<sub>n</sub> son los niveles de energía para cada modo, y la suma se realiza sobre todos los niveles considerados (cuantos más, mejor).</p>
+<ul style="font-size: 0.9em;">
+    <li>Traslacional (E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)) : 1000 niveles (n = 1 a 1000)</li>
+    <li>Rotacional (E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)) : 1001 niveles (J = 0 a 1000)</li>
+    <li>Vibracional (E<sub>n</sub> = (n + ½)ℏω) : 501 niveles (n = 0 a 500)</li>
+</ul>
+<p style="font-size: 0.9em;">Existe otra forma de calcular C<sub>V</sub> utilizando las fluctuaciones de energía:</p>
+
+<p style="font-size: 0.9em;">C<sub>V</sub> = (1 / k<sub>B</sub>T<sup>2</sup>) * (⟨E<sup>2</sup>⟩ - ⟨E⟩<sup>2</sup>)</p>
+
+
+<p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
+
+
 </details>
   
     </div>
