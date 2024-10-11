@@ -688,27 +688,34 @@
         let currentT = 1; // Temperatura actual
         let updateEmaxLabel = true; // Variable para controlar la actualización del label
 
-        function updateScales(E_max) {
-            const plotWidth = document.getElementById('cv-plot').clientWidth;
-            const plotHeight = 300;
+      function updateScales(E_max) {
+    const cvPlot = document.getElementById('cv-plot');
+    const plotWidth = cvPlot.clientWidth;
+    const plotHeight = 300; // Mantén la altura fija
 
-            const marginLeft = plotMargins.l;
-            const marginRight = plotMargins.r;
+    const marginLeft = plotMargins.l;
+    const marginRight = plotMargins.r;
 
-            const width = plotWidth;
-            const height = plotHeight;
+    const width = plotWidth;
+    const height = plotHeight;
 
-            svg.attr('viewBox', `0 0 ${width} ${height}`);
+    // Actualiza el viewBox del SVG para que coincida con el ancho del gráfico de Cv
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
 
-            xScale = d3.scaleLinear()
-                .domain([0, 3])
-                .range([marginLeft, width - marginRight]);
+    // Ajusta el ancho del contenedor del gráfico de niveles
+    d3.select('#energy-levels')
+        .style('width', `${width}px`)
+        .style('height', `${height}px`);
 
-            // Ajustar el rango de energía
-            yScale = d3.scaleLinear()
-                .domain([0, E_max * 0.5])
-                .range([height - 30, 30]);
-        }
+    xScale = d3.scaleLinear()
+        .domain([0, 3])
+        .range([marginLeft, width - marginRight]);
+
+    // Ajustar el rango de energía
+    yScale = d3.scaleLinear()
+        .domain([0, E_max * 0.5])
+        .range([height - 30, 30]);
+}
 
         function energyToColor(E, E_max) {
             const normalized_E = E / E_max;
