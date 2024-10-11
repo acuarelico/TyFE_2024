@@ -33,22 +33,20 @@
         /* Contenedor del encabezado */
         #header {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
         }
         h1 {
             text-align: center;
-            margin: 10px 0;
-            font-size: 24px;
-            line-height: 1.2;
+            flex: 1;
+            margin: 0;
         }
         /* Estilo para el icono */
         #icono {
-            width: 100px;
+            width: 150px;
             height: auto;
-            margin-bottom: 10px;
+            margin-right: 10px;
         }
         /* Contenedor de los gráficos */
         #plots {
@@ -87,7 +85,7 @@
         }
         /* Envoltorio del slider de temperatura */
         #temp-slider-wrapper {
-            width: 80%;
+            width: 60%;
             max-width: 400px;
             margin-right: 10px;
             touch-action: none;
@@ -205,12 +203,13 @@
             overflow-x: auto;
         }
         #collapsible-text {
-            margin-top: 20px;
+            margin-top: 60px;
             font-size: 14px;
             max-width: 800px;
             margin: 20px auto 0 auto;
         }
         #collapsible-text summary {
+            margin-top: 50px;
             cursor: pointer;
             list-style: none;
             font-weight: bold;
@@ -243,10 +242,17 @@
                 padding: 5px;
             }
             h1 {
-                font-size: 20px;
+                font-size: 20px; /* Título más pequeño */
+                line-height: 1.2;
+            }
+            #header {
+                flex-direction: column;
+                align-items: center;
             }
             #icono {
-                width: 80px;
+                margin-right: 0;
+                margin-bottom: 10px;
+                width: 100px;
             }
             #cv-plot, #energy-levels {
                 height: 250px;
@@ -255,24 +261,11 @@
             #slider-container {
                 flex-direction: column;
                 align-items: center;
-                margin-top: 5px;
-                margin-bottom: 5px;
             }
             #temp-slider-wrapper {
                 width: 90%;
                 margin-right: 0;
                 margin-bottom: 10px;
-            }
-            #temp-slider {
-                height: 20px;
-            }
-            #temp-slider::-webkit-slider-thumb {
-                width: 20px;
-                height: 20px;
-            }
-            #temp-slider::-moz-range-thumb {
-                width: 20px;
-                height: 20px;
             }
             #auto-scale-container {
                 margin-top: 15px;
@@ -288,19 +281,21 @@
             label[for="auto-scale-checkbox"] {
                 font-size: 14px;
             }
-            #temp-value {
-                font-size: 14px;
-            }
-            #collapsible-text-container {
-                font-size: 14px;
-            }
             #collapsible-text summary {
-                font-size: 16px !important;
-                padding: 5px 0;
+                font-size: 16px !important;            
+                padding: 10px 0;        
             }
             #collapsible-text {
-                font-size: 12px;
-                margin-top: 10px;
+                width: 100%;
+                margin: 50px 0 0 0;
+            }
+            #temp-value {
+                font-size: 16px;
+            }
+            /* Reducir el tamaño de los textos en el gráfico superior */
+            #cv-plot .ytick text,
+            #cv-plot .xtick text {
+                font-size: 10px !important;
             }
         }
     </style>
