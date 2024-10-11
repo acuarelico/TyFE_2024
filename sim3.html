@@ -287,80 +287,17 @@
             </div>
         </div>
         <!-- Texto desplegable debajo del slider -->
- <details id="collapsible-text">
+ 
+<details id="collapsible-text">
     <summary>> Mostrar explicación</summary>
     <p>
         Esta simulación ilustra la capacidad calorífica por partícula (C<sub>V</sub>) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado.
     </p>
-    <h3>Gráficos</h3>
+    <h3>• Gráfico superior</h3>
     <p>
-        Gráfico superior: Muestra C<sub>V</sub> en función de T. Las líneas horizontales punteadas representan los límites clásicos de C<sub>V</sub> para diferentes grados de libertad activos.
+        Muestra C<sub>V</sub>= (∂⟨E⟩/∂T)<sub>V</sub> en función de T, siendo ⟨E⟩ es la energía media de la partícula. Las líneas horizontales punteadas representan los límites clásicos de C<sub>V</sub> para diferentes grados de libertad activos.     
     </p>
-    <p>
-        Gráfico inferior: Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, e<sup>-E/k<sub>B</sub>T</sup>.
-    </p>
-    <h3>Niveles de energía</h3>
-<p>Los niveles de energía para cada modo se calculan como sigue:</p>
-
-<ul>
-              <li>Traslacional: E<sub>{n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub>}</sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)
-                <br><br>
-                n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub> = números cuánticos (enteros positivos)
-                <br>h = constante de Planck
-                <br>m = 9.1093837 × 10<sup>-31</sup> kg (masa del electrón)
-                <br>L = 7 × 10<sup>-8</sup> m (longitud de la caja)
-                </li>
-
-     <br>
-    <li>Rotacional: E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)
-    <br><br>
-    J = número cuántico rotacional
-    <br>ℏ = h/2π (constante de Planck reducida)
-    <br>I = 2.2 × 10<sup>-46</sup> kg·m<sup>2</sup> (momento de inercia)
-    </li>
-
-    <br>
-
-    <li>Vibracional: E<sub>n</sub> = (n + ½)ℏω
-    <br><br>
-    n = número cuántico vibracional
-    <br>ℏ = h/2π (constante de Planck reducida)
-    <br>ω = 5 × 10<sup>13</sup> rad/s (frecuencia angular del oscilador)
-    </li>
-</ul>
- 
-
-<p><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
-
-<ol>
-    <li>Se calcula la energía en una dimensión usando la ecuación: E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)</li>
-    <li>Este resultado se multiplica por 3 para el computo de C<sub>V</sub>, asumiendo que las componentes x, y, y z son independientes.</li>
-</ol>
-
-<p>Esta aproximación difiere del cálculo 3D riguroso, que vendría dado por:</p>
-
-<p>E<sub>n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub></sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)</p>
-
-<p>Las principales implicaciones de esta simplificación son:</p>
-
-<ul>
-    <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía, lo que reduce drásticamente el costo computacional.</li>
-    <li><strong>Visualización:</strong> La menor densidad de niveles permite una representación visual más clara y menos saturada de los niveles traslacionales. Solo se representan los niveles derivados de E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>).</li>
-    <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, donde la densidad de niveles de energía más bajos son cruciales, esta aproximación podría resultar en un C<sub>V</sub> ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
-    
-<p>A pesar de la aproximación usada, la separacion entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva C<sub>V</sub>  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
-</ul>
-
-    <h3>Cálculo de C<sub>V</sub></h3>
-    <p>
-        C<sub>V</sub> se calcula como la derivada de la energía media respecto a la temperatura:
-    
-            C<sub>V</sub> = (∂⟨E⟩/∂T)<sub>V</sub>
-    
-    <p>
-        Donde ⟨E⟩ es la energía media de la partícula.
-    </p>
-    <h3>Comportamiento con la temperatura</h3>
+    <h4>Comportamiento con la temperatura</h4>
     <p>
         <strong>Bajas temperaturas:</strong> Solo los niveles traslacionales más bajos son accesibles debido a su menor separación energética. C<sub>V</sub> es bajo ya que solo estos niveles pueden almacenar energía.
     </p>
@@ -370,7 +307,7 @@
     <p>
         <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando C<sub>V</sub> a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energia.
     </p>
-    <h3>Límites clásicos</h3>
+    <h4>Límites clásicos</h4>
     <p>
         A altas temperaturas, C<sub>V</sub> se aproxima a los límites clásicos:
     </p>
@@ -380,14 +317,65 @@
         <li>7/2 k<sub>B</sub>: Traslación, rotación y vibración activas</li>
     </ul>
     
-    <h3>Botón de autoescalado</h3>
+    <h3>• Gráfico inferior</h3>
     <p>
-        El botón de autoescalado ajusta dinámicamente la escala de energía del gráfico inferior:
+        Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, e<sup>-E/k<sub>B</sub>T</sup>.
     </p>
+   
+    
+        El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de energía del gráfico inferior:
+    
     <ul>
         <li><strong>Activado:</strong> La escala se ajusta con la temperatura, manteniendo visible la línea k<sub>B</sub>T.</li>
         <li><strong>Desactivado:</strong> La escala se fija, permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
     </ul>
+    
+    <h3>• Niveles de energía</h3>
+    <p>Los niveles de energía para cada modo se calculan como sigue:</p>
+    <ul>
+        <li>Traslacional: E<sub>{n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub>}</sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)
+        <br><br>
+        n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub> = números cuánticos (enteros positivos)
+        <br>h = constante de Planck
+        <br>m = 9.1093837 × 10<sup>-31</sup> kg (masa del electrón)
+        <br>L = 7 × 10<sup>-8</sup> m (longitud de la caja)
+        </li>
+        <br>
+        <li>Rotacional: E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)
+        <br><br>
+        J = número cuántico rotacional
+        <br>ℏ = h/2π (constante de Planck reducida)
+        <br>I = 2.2 × 10<sup>-46</sup> kg·m<sup>2</sup> (momento de inercia)
+        </li>
+        <br>
+        <li>Vibracional: E<sub>n</sub> = (n + ½)ℏω
+        <br><br>
+        n = número cuántico vibracional
+        <br>ℏ = h/2π (constante de Planck reducida)
+        <br>ω = 5 × 10<sup>13</sup> rad/s (frecuencia angular del oscilador)
+        </li>
+    </ul>
+
+    <p style="font-size: 0.9em;"><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
+
+    <ol style="font-size: 0.9em;">
+        <li>Se calcula la energía en una dimensión usando la ecuación: E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)</li>
+        <li>Este resultado se multiplica por 3 para el computo de C<sub>V</sub>, asumiendo que las componentes x, y, y z son independientes.</li>
+    </ol>
+
+    <p style="font-size: 0.9em;">Esta aproximación difiere del cálculo 3D riguroso, utilizando:</p>
+
+    <p style="font-size: 0.9em;">E<sub>n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub></sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)</p>
+
+    <p style="font-size: 0.9em;">Las principales implicaciones de esta simplificación son:</p>
+
+    <ul style="font-size: 0.9em;">
+        <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía traslacional, lo que reduce drásticamente el costo computacional.</li>
+        <li><strong>Visualización:</strong> La menor densidad de niveles traslacionales permite una representación visual más clara y menos saturada. Solo se representan los niveles correspondientes a E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>).</li>
+        <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, esta aproximación podría resultar en un C<sub>V</sub> ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
+    </ul>
+    
+    <p style="font-size: 0.9em;">A pesar de la aproximación usada, la separacion entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva C<sub>V</sub>  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
 </details>
   
     </div>
