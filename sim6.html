@@ -3,29 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Capacidad Calorífica por Partícula</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Incluir Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- Incluir D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
      
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            options: {
-                renderActions: {
-                    addMenu: [0, '', '']
-                }
-            }
-        };
-    </script>
-
+    <!-- Incluir KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"></script>
 
     <style>
         /* Estilos generales */
@@ -35,6 +22,7 @@
             padding: 10px;
             font-family: Arial, sans-serif;
             background-color: #ffffff;
+            overflow-x: hidden;
         }
         /* Contenedor principal */
         #main-container {
@@ -209,6 +197,11 @@
             pointer-events: none;
         }
         /* Estilo para el texto desplegable */
+        #collapsible-text-container {
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
         #collapsible-text {
             margin-top: 60px;
             font-size: 14px;
@@ -227,50 +220,10 @@
             padding: 10px 0;
             text-align: justify;
         }
-        /* Ajustes para dispositivos móviles */
-        @media (max-width: 600px) {
-            #header {
-                flex-direction: column;
-                align-items: center;
-            }
-            #icono {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            #slider-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            #temp-slider-wrapper {
-                width: 80%;
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            #auto-scale-container {
-                margin-top: 15px;
-            }
-            #auto-scale-checkbox {
-                width: 40px;
-                height: 40px;
-            }
-            #auto-scale-checkbox:checked::before {
-                font-size: 24px;
-                line-height: 40px;
-            }
-            label[for="auto-scale-checkbox"] {
-                font-size: 20px;
-            }
-            #collapsible-text summary {
-            font-size: 44px !important;            
-            padding: 10px 0;        
-            }
-            #collapsible-text {
-                width: 100%;
-                margin: 50px 0 0 0;
-            }
-            #temp-value {
-                font-size: 16px;
-            }
+        /* Ajustes para fórmulas matemáticas en dispositivos móviles */
+        #collapsible-text-container .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         /* Estilo para el texto de E_max */
         .e-max-label {
@@ -281,6 +234,69 @@
         .e-max-arrow {
             stroke: gray;
             fill: gray;
+        }
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+                padding: 5px;
+            }
+            h1 {
+                font-size: 20px; /* Título más pequeño */
+                line-height: 1.2;
+            }
+            #header {
+                flex-direction: column;
+                align-items: center;
+            }
+            #icono {
+                margin-right: 0;
+                margin-bottom: 10px;
+                width: 100px;
+            }
+            #cv-plot, #energy-levels {
+                height: 250px;
+                margin-bottom: 10px;
+            }
+            #slider-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            #temp-slider-wrapper {
+                width: 90%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            #auto-scale-container {
+                margin-top: 15px;
+            }
+            #auto-scale-checkbox {
+                width: 24px;
+                height: 24px;
+            }
+            #auto-scale-checkbox:checked::before {
+                font-size: 18px;
+                line-height: 24px;
+            }
+            label[for="auto-scale-checkbox"] {
+                font-size: 14px;
+            }
+            #collapsible-text summary {
+                font-size: 16px !important;            
+                padding: 10px 0;        
+            }
+            #collapsible-text {
+                width: 100%;
+                margin: 50px 0 0 0;
+            }
+            #temp-value {
+                font-size: 16px;
+            }
+            /* Reducir el tamaño de los textos en el gráfico superior */
+            #cv-plot .ytick text,
+            #cv-plot .xtick text {
+                font-size: 10px !important;
+            }
         }
     </style>
 </head>
@@ -303,7 +319,7 @@
         <!-- Contenedor del slider y el checkbox -->
         <div id="slider-container">
             <div id="temp-slider-wrapper">
-                <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+                <input type="range" id="temp-slider" min="0" max="5" step="0.01" value="0">
             </div>
             <div id="auto-scale-container">
                 <input type="checkbox" id="auto-scale-checkbox" checked>
@@ -311,9 +327,9 @@
             </div>
         </div>
         <!-- Texto desplegable debajo del slider -->
- 
-<details id="collapsible-text">
-  <summary>> Mostrar explicación</summary>
+        <div id="collapsible-text-container">
+        <details id="collapsible-text">
+            <summary>> Mostrar explicación</summary>
 <p>
     Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado.
 </p>
@@ -329,7 +345,7 @@
     <strong>Temperaturas intermedias:</strong> Los niveles rotacionales se vuelven accesibles, aumentando \(C_V\) ya que más estados pueden almacenar energía con el mismo incremento de T.
 </p>
 <p>
-    <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando \(C_V\) a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energia.
+    <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando \(C_V\) a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energía.
 </p>
 <h4>Límites clásicos</h4>
 <p>
@@ -361,22 +377,22 @@
     <br><br>
     \(n_x, n_y, n_z\) = números cuánticos ( \(n \geq 1\), enteros)
     <br>\(h\) = constante de Planck
-    <br>\(m = 9.1093837 \times 10^{-31}\) kg (masa del electrón)
-    <br>\(L = 7 \times 10^{-8}\) m (longitud de la caja)
+    <br>\(m = 3.3210781332 \times 10^{-27}\) kg (masa de H₂)
+    <br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
     </li>
     <br>
     <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
     <br><br>
     \(J\) = número cuántico rotacional (\(J \geq 0\), entero)
     <br>\(\hbar = h/2\pi\) (constante de Planck reducida)
-    <br>\(I = 2.2 \times 10^{-46}\) kg·m² (momento de inercia)
+    <br>\(I = 4.61 \times 10^{-48}\) kg·m² (momento de inercia de H₂)
     </li>
     <br>
     <li>Vibracional: \(E_n = (n + \frac{1}{2})\hbar\omega\)
     <br><br>
     \(n\) = número cuántico vibracional (\(n \geq 0\), entero)
     <br>\(\hbar = h/2\pi\) (constante de Planck reducida)
-    <br>\(\omega = 5 \times 10^{13}\) rad/s (frecuencia angular del oscilador)
+    <br>\(\omega = 8.28 \times 10^{14}\) rad/s (frecuencia angular del oscilador)
     </li>
 </ul>
 
@@ -384,7 +400,7 @@
 
 <ol style="font-size: 0.9em;">
     <li>Se calcula la energía en una dimensión usando la ecuación: \(E_n = \frac{n^2h^2}{8mL^2}\)</li>
-    <li>Este resultado se multiplica por 3 para el computo de \(C_V\), asumiendo que las componentes x, y, y z son independientes.</li>
+    <li>Este resultado se multiplica por 3 para el cómputo de \(C_V\), asumiendo que las componentes x, y, y z son independientes.</li>
 </ol>
 
 <p style="font-size: 0.9em;">Esta aproximación difiere del cálculo 3D riguroso, utilizando:</p>
@@ -399,7 +415,7 @@
     <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, esta aproximación podría resultar en un \(C_V\) ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
 </ul>
 
-<p style="font-size: 0.9em;">A pesar de la aproximación usada, la separacion entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva \(C_V\)  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
+<p style="font-size: 0.9em;">A pesar de la aproximación usada, la separación entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva \(C_V\)  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
 
 <p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de \(C_V\):</strong> En esta simulación, \(C_V = (\partial\langle E\rangle/\partial T)_V\) se aproxima numéricamente usando la fórmula:</p>
 
@@ -430,23 +446,33 @@
 <p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
 
 
-</details>
-  
+        </details>
     </div>
 
+  <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        });
+    </script>
 
-<script>
+    <!-- Tu script JavaScript existente -->
+    <script>
         // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
-        const m = 9.1093837e-31;   // Masa del electrón
-        const L = 0.7e-7;          // Longitud de la caja
-        const I = 2.2e-46;         // Momento de inercia
-        const omega = 0.5e14;      // Frecuencia angular del oscilador armónico
+        const m = 2 * 1.66053906660e-27;   // Masa de H2 (2 u)
+        const L = 0.5e-9;          // Longitud de la caja (1 nm)
+        const I = 4.61e-48;         // Momento de inercia de H2
+        const omega = 8.28e14;      // Frecuencia angular del oscilador armónico para H2
 
         // Rango de temperaturas
         const temperatures = [];
-        for (let i = -1; i <= 4; i += 0.01) {
+        for (let i = 0; i <= 5; i += 0.01) {
             temperatures.push(Math.pow(10, i));
         }
 
@@ -528,25 +554,25 @@
         let horizontal_lines = [
             {
                 type: 'line',
-                x0: 0.1,
+                x0: 1,
                 y0: 3.5,
-                x1: 10000,
+                x1: 1e5,
                 y1: 3.5,
                 line: { dash: 'dash', width: 1, color: 'gray' }
             },
             {
                 type: 'line',
-                x0: 0.1,
+                x0: 1,
                 y0: 2.5,
-                x1: 10000,
+                x1: 1e5,
                 y1: 2.5,
                 line: { dash: 'dash', width: 1, color: 'gray' }
             },
             {
                 type: 'line',
-                x0: 0.1,
+                x0: 1,
                 y0: 1.5,
-                x1: 10000,
+                x1: 1e5,
                 y1: 1.5,
                 line: { dash: 'dash', width: 1, color: 'gray' }
             }
@@ -558,7 +584,7 @@
             xaxis: {
                 type: 'log',
                 title: 'Temperatura (K)',
-                range: [-1, 4],
+                range: [0, 5],
                 automargin: true,
                 showgrid: false,
                 fixedrange: true
@@ -995,6 +1021,21 @@
         // Inicializar
         updateTemperature();
         updateAutoScale();
+
+        // Inicializar KaTeX al abrir el detalle
+        document.getElementById('collapsible-text').addEventListener('toggle', function(event) {
+            if (event.target.open) {
+                renderMathInElement(event.target, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "\\[", right: "\\]", display: true},
+                        {left: "\\(", right: "\\)", display: false},
+                        {left: "$", right: "$", display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        });
     </script>
 </body>
 </html>
