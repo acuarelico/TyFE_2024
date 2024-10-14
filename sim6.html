@@ -15,6 +15,26 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"></script>
 
     <style>
+        /* Variables CSS para ajustes globales */
+        :root {
+            /* Tamaño del título */
+            --title-font-size: 28px;
+            /* Tamaño del icono */
+            --icon-width: 150px;
+            --icon-height: auto;
+            /* Tamaño de los gráficos */
+            --plot-height: 300px;
+            /* Tamaño del texto en el gráfico de Cv */
+            --cv-annotations-font-size: 12px;
+            /* Tamaño del slider */
+            --slider-thumb-size: 24px;
+            --slider-track-height: 8px;
+            /* Posición del botón de autoescalado */
+            --auto-scale-button-position: relative;
+            --auto-scale-button-top: 0;
+            --auto-scale-button-right: 0;
+        }
+
         /* Estilos generales */
         html, body {
             height: 100%;
@@ -41,11 +61,12 @@
             text-align: center;
             flex: 1;
             margin: 0;
+            font-size: var(--title-font-size); /* Tamaño del título */
         }
         /* Estilo para el icono */
         #icono {
-            width: 150px;
-            height: auto;
+            width: var(--icon-width); /* Tamaño del icono */
+            height: var(--icon-height);
             margin-right: 10px;
         }
         /* Contenedor de los gráficos */
@@ -61,7 +82,7 @@
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 20px;
-            height: 300px;
+            height: var(--plot-height); /* Altura de los gráficos */
         }
         /* Sobrescribir el estilo del cursor en los elementos internos de Plotly */
         #cv-plot .cursor-crosshair,
@@ -82,6 +103,7 @@
             margin-top: 10px;
             margin-bottom: 10px;
             flex-wrap: wrap;
+            position: relative; /* Para posicionar el botón de autoescalado */
         }
         /* Envoltorio del slider de temperatura */
         #temp-slider-wrapper {
@@ -98,7 +120,7 @@
             padding: 0;
             -webkit-appearance: none;
             appearance: none;
-            height: 30px;
+            height: var(--slider-track-height); /* Altura de la pista del slider */
             background: transparent;
             position: relative;
             z-index: 1;
@@ -106,19 +128,19 @@
         /* Estilo de la pista del slider */
         #temp-slider::-webkit-slider-runnable-track {
             width: 100%;
-            height: 8px;
+            height: var(--slider-track-height); /* Altura de la pista del slider */
             background: #ddd;
             border-radius: 4px;
         }
         #temp-slider::-moz-range-track {
             width: 100%;
-            height: 8px;
+            height: var(--slider-track-height);
             background: #ddd;
             border-radius: 4px;
         }
         #temp-slider::-ms-track {
             width: 100%;
-            height: 8px;
+            height: var(--slider-track-height);
             background: #ddd;
             border-radius: 4px;
             border: none;
@@ -128,24 +150,24 @@
         #temp-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: var(--slider-thumb-size); /* Tamaño del pulgar del slider */
+            height: var(--slider-thumb-size);
             background: #4CAF50;
             border-radius: 50%;
             cursor: pointer;
-            margin-top: -8px;
+            margin-top: calc(-0.5 * var(--slider-thumb-size) + 0.5 * var(--slider-track-height));
         }
         #temp-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
+            width: var(--slider-thumb-size);
+            height: var(--slider-thumb-size);
             background: #4CAF50;
             border: none;
             border-radius: 50%;
             cursor: pointer;
         }
         #temp-slider::-ms-thumb {
-            width: 24px;
-            height: 24px;
+            width: var(--slider-thumb-size);
+            height: var(--slider-thumb-size);
             background: #4CAF50;
             border: none;
             border-radius: 50%;
@@ -156,6 +178,9 @@
             display: flex;
             align-items: center;
             margin-top: 10px;
+            position: var(--auto-scale-button-position); /* Posición del botón de autoescalado */
+            top: var(--auto-scale-button-top);
+            right: var(--auto-scale-button-right);
         }
         #auto-scale-checkbox {
             -webkit-appearance: none;
@@ -237,38 +262,55 @@
         }
         /* Ajustes para dispositivos móviles */
         @media (max-width: 600px) {
+            /* Variables CSS para ajustes en móviles */
+            :root {
+                --title-font-size: 12px; /* Tamaño del título en móviles */
+                --icon-width: 60px; /* Tamaño del icono en móviles */
+                --plot-height: 180px; /* Altura de los gráficos en móviles */
+                --cv-annotations-font-size: 10px; /* Tamaño del texto en el gráfico de Cv en móviles */
+                --slider-thumb-size: 16px; /* Tamaño del slider en móviles */
+                --slider-track-height: 10px;
+                --auto-scale-button-top: 5px; /* Posición del botón de autoescalado en móviles */
+            }
             body {
-                font-size: 14px;
+                font-size: 12px;
                 padding: 5px;
             }
             h1 {
-                font-size: 20px; /* Título más pequeño */
+                font-size: var(--title-font-size); /* Tamaño del título en móviles */
                 line-height: 1.2;
             }
             #header {
                 flex-direction: column;
                 align-items: center;
             }
+            #collapsible-text {
+    /* ... */
+    margin: 20px 0px 0px 0px; /* Ajusta el margen superior */
+}
+ 
+
             #icono {
                 margin-right: 0;
-                margin-bottom: 10px;
-                width: 100px;
+                margin-bottom: 5px;
+                width: var(--icon-width); /* Tamaño del icono en móviles */
             }
             #cv-plot, #energy-levels {
-                height: 250px;
-                margin-bottom: 10px;
+                height: var(--plot-height); /* Altura de los gráficos en móviles */
+                margin-bottom: 5px;
             }
             #slider-container {
                 flex-direction: column;
                 align-items: center;
             }
             #temp-slider-wrapper {
-                width: 90%;
-                margin-right: 0;
-                margin-bottom: 10px;
+                width: 80%;
+                margin-right: 5px;
+                margin-left: 35px;
+                margin-bottom: 0px;
             }
             #auto-scale-container {
-                margin-top: 15px;
+                margin-top: var(--auto-scale-button-top); /* Posición del botón de autoescalado en móviles */
             }
             #auto-scale-checkbox {
                 width: 24px;
@@ -283,19 +325,20 @@
             }
             #collapsible-text summary {
                 font-size: 16px !important;            
-                padding: 10px 0;        
+                padding: 0px 0;
+                 margin: 10px 0px 0px 0px; /* Ajusta el margen superior */        
             }
             #collapsible-text {
                 width: 100%;
-                margin: 50px 0 0 0;
+                margin: 50px 0px 0px 0px;
             }
             #temp-value {
-                font-size: 16px;
+                font-size: 14px;
             }
             /* Reducir el tamaño de los textos en el gráfico superior */
             #cv-plot .ytick text,
             #cv-plot .xtick text {
-                font-size: 10px !important;
+                font-size: var(--cv-annotations-font-size) !important; /* Tamaño del texto en el gráfico de Cv en móviles */
             }
         }
     </style>
@@ -447,9 +490,10 @@
 
 
         </details>
+
     </div>
 
-  <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             renderMathInElement(document.body, {
                 delimiters: [
@@ -462,6 +506,9 @@
 
     <!-- Tu script JavaScript existente -->
     <script>
+        // Detección de dispositivo móvil (declarado como variable global)
+        var isMobile = window.matchMedia("(max-width: 600px)").matches;
+
         // Constantes físicas
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
@@ -537,8 +584,11 @@
             Cv_total.push(Cv / kB);
         }
 
-        // Obtener márgenes del gráfico de Plotly
-        let plotMargins = { t: 30, l: 60, r: 20, b: 50 };
+        // Definir los márgenes del gráfico en función del dispositivo
+        let plotMargins = isMobile ? { t: 5, l: 60, r: 20, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
+
+        // Definir el tamaño de fuente para las anotaciones
+        let annotationFontSize = isMobile ? 10 : 12;
 
         // Graficar Cv vs T
         let traceCv = {
@@ -587,7 +637,8 @@
                 range: [0, 5],
                 automargin: true,
                 showgrid: false,
-                fixedrange: true
+                fixedrange: true,
+                tickfont: { size: 12 }
             },
             yaxis: {
                 title: 'C<sub>V</sub>',
@@ -608,7 +659,7 @@
                     yref: 'y',
                     text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
                     showarrow: false,
-                    font: { size: 12 },
+                    font: { size: annotationFontSize },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 },
@@ -619,7 +670,7 @@
                     yref: 'y',
                     text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
                     showarrow: false,
-                    font: { size: 12 },
+                    font: { size: annotationFontSize },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 },
@@ -630,7 +681,7 @@
                     yref: 'y',
                     text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
                     showarrow: false,
-                    font: { size: 12 },
+                    font: { size: annotationFontSize },
                     xanchor: 'left',
                     yanchor: 'bottom'
                 }
@@ -690,7 +741,7 @@
 
         function updateScales(E_max) {
             const plotWidth = document.getElementById('cv-plot').clientWidth;
-            const plotHeight = 300;
+            const plotHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--plot-height')); // Usar variable CSS
 
             const marginLeft = plotMargins.l;
             const marginRight = plotMargins.r;
@@ -834,7 +885,20 @@
                 let E_label_text_line2 = E_label_energy_KBT_formatted;
 
                 // Posicionar el label
-                let labelX = xScale(-0.253); // Posición fija para evitar vibración
+                let labelX;
+                let textAnchor;
+                let arrowDirection; // 'left' or 'right'
+
+                if (isMobile) {
+                    labelX = xScale(3.15); // Mover al margen derecho
+                    textAnchor = 'end'; // Alinear a la derecha
+                    arrowDirection = 'left';
+                } else {
+                    labelX = xScale(-0.253); // Posición original
+                    textAnchor = 'start'; // Alinear a la izquierda
+                    arrowDirection = 'right';
+                }
+
                 let labelY = yScale(E_label_energy) -9; // Ajusta la posición vertical según sea necesario
 
                 // Agregar el texto en dos líneas con subíndice
@@ -842,7 +906,7 @@
                     .attr('class', 'e-max-label')
                     .attr('x', labelX)
                     .attr('y', labelY)
-                    .attr('text-anchor', 'start')
+                    .attr('text-anchor', textAnchor)
                     .attr('font-size', '12px')
                     .attr('font-family', 'monospace');
 
@@ -857,22 +921,43 @@
                     .html(E_label_text_line2.replace('K₍B₎T', 'K<tspan baseline-shift="sub">B</tspan>T'));
 
                 // Dibujar la flecha pequeña
-                let arrowX = labelX + 39; // Ajustar según sea necesario
-                let arrowY = labelY + 9;  // Centrar verticalmente entre las dos líneas
+                let arrowX, arrowY;
+                let arrowLength = 14; // Longitud de la flecha
+                let arrowOffset = 35; // Offset desde el texto
 
-                svg.append('line')
-                    .attr('class', 'e-max-arrow')
-                    .attr('x1', arrowX)
-                    .attr('y1', arrowY)
-                    .attr('x2', arrowX + 0)
-                    .attr('y2', arrowY)
-                    .attr('stroke', 'black')
-                    .attr('stroke-width', 0.5);
+                arrowY = labelY + 9;  // Centrar verticalmente entre las dos líneas
 
-                svg.append('polygon')
-                    .attr('class', 'e-max-arrow')
-                    .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
-                    .attr('fill', 'gray');
+                if (arrowDirection === 'right') {
+                    arrowX = labelX + arrowOffset; // Flecha hacia la derecha
+                    svg.append('line')
+                        .attr('class', 'e-max-arrow')
+                        .attr('x1', arrowX)
+                        .attr('y1', arrowY)
+                        .attr('x2', arrowX + 0)
+                        .attr('y2', arrowY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 0.5);
+
+                    svg.append('polygon')
+                        .attr('class', 'e-max-arrow')
+                        .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
+                        .attr('fill', 'gray');
+                } else if (arrowDirection === 'left') {
+                    arrowX = labelX - arrowOffset; // Flecha hacia la izquierda
+                    svg.append('line')
+                        .attr('class', 'e-max-arrow')
+                        .attr('x1', arrowX)
+                        .attr('y1', arrowY)
+                        .attr('x2', arrowX - 0)
+                        .attr('y2', arrowY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 0.5);
+
+                    svg.append('polygon')
+                        .attr('class', 'e-max-arrow')
+                        .attr('points', `${arrowX - 5},${arrowY - 3} ${arrowX - 5},${arrowY + 3} ${arrowX - 14},${arrowY}`)
+                        .attr('fill', 'gray');
+                }
             }
 
             // Añadir la línea horizontal roja
@@ -1012,8 +1097,25 @@
         tempSlider.addEventListener('input', updateTemperature);
         autoScaleCheckbox.addEventListener('change', updateAutoScale);
 
-        // Manejar redimensionamiento de ventana
+        // Manejar redimensionamiento de ventana para ajustar los márgenes y el tamaño de las anotaciones
         window.addEventListener('resize', () => {
+            // Actualizar la detección de dispositivo móvil
+            isMobile = window.matchMedia("(max-width: 600px)").matches;
+            annotationFontSize = isMobile ? 10 : 12;
+
+            // Actualizar los márgenes del gráfico
+            plotMargins = isMobile ? { t: 10, l: 60, r: 20, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
+
+            // Actualizar el layout del gráfico con los nuevos márgenes
+            layoutCv.margin = plotMargins;
+
+            // Actualizar el tamaño de fuente de las anotaciones
+            layoutCv.annotations.forEach(annotation => {
+                annotation.font.size = annotationFontSize;
+            });
+
+            // Actualizar el gráfico
+            Plotly.relayout('cv-plot', layoutCv);
             Plotly.Plots.resize('cv-plot');
             updateEnergyLevels(); // Actualizar escalas y niveles de energía
         });
