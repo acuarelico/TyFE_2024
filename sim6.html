@@ -234,7 +234,7 @@
             margin: 20px auto 0 auto;
         }
         #collapsible-text summary {
-            margin-top: 50px;
+            margin-top: 30px;
             cursor: pointer;
             list-style: none;
             font-weight: bold;
@@ -833,7 +833,7 @@
 
             svg.selectAll('.label').remove();
 
-            const labelYPosition = yScale.range()[1] + 0;
+            const labelYPosition = yScale.range()[1] + -5;
 
             svg.append('text')
                 .attr('class', 'label')
