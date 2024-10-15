@@ -275,7 +275,7 @@
                 --icon-width: 70px; /* Tamaño del icono en móviles */
                 --icon-height: auto;
                 --icon-top-mobile: -10px; /* Ajusta la posición vertical del icono */
-                --icon-left-mobile: 8px; /* Ajusta la posición horizontal del icono */
+                --icon-left-mobile: 0px; /* Ajusta la posición horizontal del icono */
                 --plot-height: 200px; /* Altura de los gráficos en móviles */
                 --cv-annotations-font-size: 10px; /* Tamaño del texto en el gráfico de Cv en móviles */
                 --slider-thumb-size: 20px; /* Tamaño del slider en móviles */
@@ -391,11 +391,11 @@
             <h2>Explicación:</h2>
             <div id="collapsible-text">
                 <p>
-                    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado.
+                    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado. Ver limitaciones de este modelo al final del texto.
                 </p>
                 <h3>• Gráfico superior</h3>
                 <p>
-                    Muestra \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) en función de T, siendo \(\langle E \rangle\) la energía media de la partícula. Las líneas horizontales punteadas representan los límites clásicos de \(C_V\) para diferentes grados de libertad activos.     
+                    Muestra \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) en función de T, siendo \(\langle E \rangle\) la energía media de la partícula. Las líneas horizontales discontinuas representan los límites clásicos de \(C_V\) para diferentes grados de libertad activos.     
                 </p>
                 <h4>Comportamiento con la temperatura</h4>
                 <p>
@@ -433,13 +433,13 @@
                 <h3>• Niveles de energía</h3>
                 <p>Los niveles de energía para cada modo se calculan como sigue:</p>
                 <ul>
-                    <li>Traslacional: \(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)
-                    <br><br>
-                    \(n_x, n_y, n_z\) = números cuánticos (\(n \geq 1\), enteros)
-                    <br>\(h\) = constante de Planck
-                    <br>\(m = 3.3210781332 \times 10^{-27}\) kg (masa de H₂)
-                    <br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
-                    </li>
+                    <li>Traslacional( x3): \(E_n = \frac{n^2h^2}{8mL^2}\)
+    <br><br>
+    \(n\) = número cuántico (\(n \geq 1\), entero)
+    <br>\(h\) = constante de Planck
+    <br>\(m = 3.3210781332 \times 10^{-27}\) kg (masa de H₂)
+    <br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
+</li>
                     <br>
                     <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
                     <br><br>
@@ -456,25 +456,7 @@
                     </li>
                 </ul>
                 
-                <p style="font-size: 0.9em;"><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
-                
-                <ol style="font-size: 0.9em;">
-                    <li>Se calcula la energía en una dimensión usando la ecuación: \(E_n = \frac{n^2h^2}{8mL^2}\)</li>
-                    <li>Este resultado se multiplica por 3 para el cómputo de \(C_V\), asumiendo que las componentes x, y, y z son independientes.</li>
-                </ol>
-                
-                <p style="font-size: 0.9em;">Esta aproximación difiere del cálculo 3D riguroso, utilizando:</p>
-                
-                <p style="font-size: 0.9em;">\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)</p>
-                
-                <p style="font-size: 0.9em;">Las principales implicaciones de esta simplificación son:</p>
-                
-                <ul style="font-size: 0.9em;">
-                    <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía traslacional, lo que reduce drásticamente el costo computacional.</li>
-                    <li><strong>Visualización:</strong> La menor densidad de niveles traslacionales permite una representación visual más clara y menos saturada. Solo se representan los niveles correspondientes a \(E_n = \frac{n^2h^2}{8mL^2}\).</li>
-                    <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, esta aproximación podría resultar en un \(C_V\) ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
-                </ul>
-                <p style="font-size: 0.9em;">A pesar de la aproximación usada, la separación entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva \(C_V\) se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
+               
                 <p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de \(C_V\):</strong> En esta simulación, \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) se aproxima numéricamente usando la fórmula:</p>
                 
                 <p style="font-size: 0.9em;">\[C_V = \frac{1}{k_B} \cdot \frac{3 \Delta E_{\text{trans}} + \Delta E_{\text{rot}} + \Delta E_{\text{vib}}}{\Delta T}\]</p>
@@ -502,6 +484,28 @@
                 <p style="font-size: 0.9em;">\[C_V = \frac{1}{k_BT^2} \left(\langle E^2 \rangle - \langle E \rangle^2\right)\]</p>
                 
                 <p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
+
+<p style="font-size: 0.9em;"><strong> Limitaciones del modelo:</strong>
+<div style="font-size: 0.9em;">
+    <p>Este modelo, aunque útil para comprender el comportamiento general de la capacidad calorífica de moléculas diatómicas, tiene varias limitaciones importantes:</p>
+    <ul>
+        <li><strong>Gas ideal a baja presión:</strong> Se asume un gas a baja presión en un volumen fijo, lo cual puede no ser representativo de todas las condiciones experimentales.</li>
+        <li><strong>Fase gaseosa constante:</strong> Se supone que la molécula se mantiene en fase gaseosa en todo el rango de temperaturas.</li>
+        <li><strong>No disociación:</strong> El modelo no considera la posibilidad de disociación molecular a altas temperaturas donde se perdería el carácter diatómico.</li>
+        <li><strong>Independencia de niveles energéticos:</strong> Se asume que los niveles energéticos (traslacional, rotacional y vibracional) son independientes entre sí. Esta aproximación es menos precisa a altas temperaturas, donde puede haber un acoplamiento significativo entre estos modos.</li>
+        <li><strong>Simplificación de niveles traslacionales:</strong> Se utiliza una aproximación unidimensional (la que se visualiza) \(E_n = \frac{n^2h^2}{8mL^2}\), en lugar del cálculo 3D completo (\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)). Esto reduce significativamente el costo computacional al generar menos niveles de energía (del orden de N en lugar de N³), y mejora la visualización al disminuir la densidad de niveles en el gráfico. Para el cómputo de \(C_V\) se considera \(3E_n\) para tener en cuenta la energía de los 3 modos traslacionales. Esto, puede llevar a ligeras imprecisiones en \(C_V\) a temperaturas muy bajas debido a la menor densidad de niveles. Sin embargo, con esta aproximación, la separación entre niveles traslacionales sigue siendo mucho menor que la de los niveles rotacionales y vibracionales, manteniendo la curva \(C_V\) prácticamente idéntica al que se obtendría con el modelo 3D completo.</li>
+        <li><strong>Aproximación armónica:</strong> Para las vibraciones, se utiliza un modelo de oscilador armónico, que es menos preciso para niveles de energía altos. Un modelo más realista sería un oscilador anarmónico.</li>
+        <li><strong>Número fijo de niveles:</strong> Se utiliza un número fijo de niveles energéticos para cada modo, lo cual es una aproximación, ya que en realidad el número de niveles accesibles aumenta con la temperatura.</li>
+        <li><strong>Aproximación de Born-Oppenheimer:</strong> Esta aproximación asume que el movimiento de los electrones y los núcleos pueden tratarse por separado debido a la gran diferencia en sus masas. Permite simplificar significativamente los cálculos de estructura molecular y espectros vibracionales. Sin embargo, puede fallar en situaciones donde los estados electrónicos están muy próximos en energía o cuando hay fuertes acoplamientos vibrónico-electrónicos, como en ciertas reacciones químicas o en moléculas excitadas. En estos casos, los movimientos electrónicos y nucleares no pueden considerarse independientes, lo que puede afectar la precisión de los cálculos de energía y, por ende, la capacidad calorífica.</li>
+        
+        <li><strong>Rotor rígido:</strong> El tratamiento de la molécula como un rotor rígido puede requerir correcciones a altas temperaturas donde la distorsión centrífuga se vuelve significativa.</li>
+          
+    <p>Referencias:</p>
+    <ol>
+        <li>McQuarrie, D. A. (2000). Statistical Mechanics. University Science Books.</li>
+        <li>Pathria, R. K., & Beale, P. D. (2011). Statistical Mechanics (3rd ed.). Academic Press.</li>
+    </ol>
+</div>
             </div>
         </div>
     </div>
