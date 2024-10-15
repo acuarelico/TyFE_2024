@@ -33,6 +33,9 @@
             --auto-scale-button-position: relative;
             --auto-scale-button-top: 0;
             --auto-scale-button-right: 0;
+            /* Nuevas variables para ajustar el icono */
+            --icon-top: 0;
+            --icon-left: 0;
         }
 
         /* Estilos generales */
@@ -68,6 +71,9 @@
             width: var(--icon-width); /* Tamaño del icono */
             height: var(--icon-height);
             margin-right: 10px;
+            position: var(--icon-position, static); /* Posición del icono */
+            top: var(--icon-top);
+            left: var(--icon-left);
         }
         /* Contenedor de los gráficos */
         #plots {
@@ -221,29 +227,30 @@
         .particle {
             pointer-events: none;
         }
-        /* Estilo para el texto desplegable */
+        /* Estilo para el contenedor de la explicación */
         #collapsible-text-container {
             width: 100%;
             box-sizing: border-box;
-            overflow-x: auto;
-        }
-        #collapsible-text {
-            margin-top: 60px;
+            /* Eliminar overflow-x para evitar scroll horizontal innecesario */
+            overflow-x: hidden;
+            /* Asegurarse de que el contenedor crece con el contenido */
+            overflow-y: visible;
+            margin: 50px auto 0 auto; /* Ajuste de márgenes */
             font-size: 14px;
             max-width: 800px;
-            margin: 20px auto 0 auto;
+            word-wrap: break-word; /* Previene overflow horizontal */
+            overflow-wrap: break-word;
         }
-        #collapsible-text summary {
-            margin-top: 30px;
-            cursor: pointer;
-            list-style: none;
-            font-weight: bold;
-            font-size: 18px;
+        #collapsible-text-container h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
         }
-        #collapsible-text p {
-            margin: 0;
-            padding: 10px 0;
-            text-align: justify;
+        #collapsible-text-container p, 
+        #collapsible-text-container h3, 
+        #collapsible-text-container h4, 
+        #collapsible-text-container ul, 
+        #collapsible-text-container ol {
+            margin: 20px 0px 0px 0px; /* Ajusta el margen superior */
         }
         /* Ajustes para fórmulas matemáticas en dispositivos móviles */
         #collapsible-text-container .katex-display {
@@ -265,7 +272,10 @@
             /* Variables CSS para ajustes en móviles */
             :root {
                 --title-font-size: 12px; /* Tamaño del título en móviles */
-                --icon-width: 60px; /* Tamaño del icono en móviles */
+                --icon-width: 70px; /* Tamaño del icono en móviles */
+                --icon-height: auto;
+                --icon-top-mobile: 0px; /* Ajusta la posición vertical del icono */
+                --icon-left-mobile: 20px; /* Ajusta la posición horizontal del icono */
                 --plot-height: 200px; /* Altura de los gráficos en móviles */
                 --cv-annotations-font-size: 10px; /* Tamaño del texto en el gráfico de Cv en móviles */
                 --slider-thumb-size: 20px; /* Tamaño del slider en móviles */
@@ -281,19 +291,22 @@
                 line-height: 1.2;
             }
             #header {
-                flex-direction: column;
+                flex-direction: row;
                 align-items: center;
+                justify-content: flex-start;
             }
-            #collapsible-text {
-    /* ... */
-    margin: 20px 0px 0px 0px; /* Ajusta el margen superior */
-}
- 
-
             #icono {
-                margin-right: 0;
-                margin-bottom: 5px;
+                margin-right: 10px;
+                margin-bottom: 0;
                 width: var(--icon-width); /* Tamaño del icono en móviles */
+                height: var(--icon-height-mobile);
+                position: absolute;
+                top: var(--icon-top-mobile);
+                left: var(--icon-left-mobile);
+            }
+            #collapsible-text-container {
+                width: 100%;
+                margin: 20px 0px 0px 0px;
             }
             #cv-plot, #energy-levels {
                 height: var(--plot-height); /* Altura de los gráficos en móviles */
@@ -324,14 +337,16 @@
             label[for="auto-scale-checkbox"] {
                 font-size: 14px;
             }
-            #collapsible-text summary {
-                font-size: 16px !important;            
-                padding: 0px 0;
-                 margin: 10px 0px 0px 0px; /* Ajusta el margen superior */        
+            #collapsible-text-container h2 {
+                font-size: 16px;
+                margin-bottom: 10px;
             }
-            #collapsible-text {
-                width: 100%;
-                margin: 50px 0px 0px 0px;
+            #collapsible-text-container p, 
+            #collapsible-text-container h3, 
+            #collapsible-text-container h4, 
+            #collapsible-text-container ul, 
+            #collapsible-text-container ol {
+                margin: 10px 0px 0px 0px; /* Ajusta el margen superior */        
             }
             #temp-value {
                 font-size: 14px;
@@ -370,128 +385,125 @@
                 <label for="auto-scale-checkbox">Autoescalado</label>
             </div>
         </div>
-        <!-- Texto desplegable debajo del slider -->
+        <!-- Contenedor de la explicación siempre visible -->
         <div id="collapsible-text-container">
-        <details id="collapsible-text">
-            <summary>> Mostrar explicación</summary>
-<p>
-    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado.
-</p>
-<h3>• Gráfico superior</h3>
-<p>
-    Muestra \(C_V = (\partial\langle E\rangle/\partial T)_V\) en función de T, siendo \(\langle E\rangle\) la energía media de la partícula. Las líneas horizontales punteadas representan los límites clásicos de \(C_V\) para diferentes grados de libertad activos.     
-</p>
-<h4>Comportamiento con la temperatura</h4>
-<p>
-    <strong>Bajas temperaturas:</strong> Solo los niveles traslacionales más bajos son accesibles debido a su menor separación energética. \(C_V\) es bajo ya que solo estos niveles pueden almacenar energía.
-</p>
-<p>
-    <strong>Temperaturas intermedias:</strong> Los niveles rotacionales se vuelven accesibles, aumentando \(C_V\) ya que más estados pueden almacenar energía con el mismo incremento de T.
-</p>
-<p>
-    <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando \(C_V\) a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energía.
-</p>
-<h4>Límites clásicos</h4>
-<p>
-    A altas temperaturas, \(C_V\) se aproxima a los límites clásicos:
-</p>
-<ul>
-    <li>\(\frac{3}{2} k_B\): Solo traslación activa</li>
-    <li>\(\frac{5}{2} k_B\): Traslación y rotación activas</li>
-    <li>\(\frac{7}{2} k_B\): Traslación, rotación y vibración activas</li>
-</ul>
-
-<h3>• Gráfico inferior</h3>
-<p>
-    Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, \(e^{-E/k_BT}\).
-</p>
-
-<p>
-    El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de energía del gráfico inferior:
-</p>
-<ul>
-    <li>Activado: La escala se ajusta con la temperatura, manteniendo visible la línea \(k_BT\).</li>
-    <li>Desactivado: La escala se fija, permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
-</ul>
-
-<h3>• Niveles de energía</h3>
-<p>Los niveles de energía para cada modo se calculan como sigue:</p>
-<ul>
-    <li>Traslacional: \(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)
-    <br><br>
-    \(n_x, n_y, n_z\) = números cuánticos ( \(n \geq 1\), enteros)
-    <br>\(h\) = constante de Planck
-    <br>\(m = 3.3210781332 \times 10^{-27}\) kg (masa de H₂)
-    <br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
-    </li>
-    <br>
-    <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
-    <br><br>
-    \(J\) = número cuántico rotacional (\(J \geq 0\), entero)
-    <br>\(\hbar = h/2\pi\) (constante de Planck reducida)
-    <br>\(I = 4.61 \times 10^{-48}\) kg·m² (momento de inercia de H₂)
-    </li>
-    <br>
-    <li>Vibracional: \(E_n = (n + \frac{1}{2})\hbar\omega\)
-    <br><br>
-    \(n\) = número cuántico vibracional (\(n \geq 0\), entero)
-    <br>\(\hbar = h/2\pi\) (constante de Planck reducida)
-    <br>\(\omega = 8.28 \times 10^{14}\) rad/s (frecuencia angular del oscilador)
-    </li>
-</ul>
-
-<p style="font-size: 0.9em;"><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
-
-<ol style="font-size: 0.9em;">
-    <li>Se calcula la energía en una dimensión usando la ecuación: \(E_n = \frac{n^2h^2}{8mL^2}\)</li>
-    <li>Este resultado se multiplica por 3 para el cómputo de \(C_V\), asumiendo que las componentes x, y, y z son independientes.</li>
-</ol>
-
-<p style="font-size: 0.9em;">Esta aproximación difiere del cálculo 3D riguroso, utilizando:</p>
-
-<p style="font-size: 0.9em;">\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)</p>
-
-<p style="font-size: 0.9em;">Las principales implicaciones de esta simplificación son:</p>
-
-<ul style="font-size: 0.9em;">
-    <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía traslacional, lo que reduce drásticamente el costo computacional.</li>
-    <li><strong>Visualización:</strong> La menor densidad de niveles traslacionales permite una representación visual más clara y menos saturada. Solo se representan los niveles correspondientes a \(E_n = \frac{n^2h^2}{8mL^2}\).</li>
-    <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, esta aproximación podría resultar en un \(C_V\) ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
-</ul>
-
-<p style="font-size: 0.9em;">A pesar de la aproximación usada, la separación entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva \(C_V\)  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
-
-<p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de \(C_V\):</strong> En esta simulación, \(C_V = (\partial\langle E\rangle/\partial T)_V\) se aproxima numéricamente usando la fórmula:</p>
-
-<p style="font-size: 0.9em;">\[C_V = \frac{1}{k_B} \cdot \frac{3 \Delta E_{trans} + \Delta E_{rot} + \Delta E_{vib}}{\Delta T}\]</p>
-
-<p style="font-size: 0.9em;">Donde:</p>
-<ul style="font-size: 0.9em;">
-    <li>\(k_B\) es la constante de Boltzmann</li>
-    <li>\(\Delta E = E[i] - E[i-1]\) (cambio en la energía promedio computado para cada modo (traslacional, rotacional, vibracional) )</li>
-    <li>\(\Delta T = T[i] - T[i-1]\) (cambio en la temperatura)</li>
-    <li>i representa el índice de la temperatura en el array de temperaturas. T[i] y T[i-1] son dos temperaturas sucesivas.</li>
-</ul>
-
-<p style="font-size: 0.9em;">Los promedios de energía para cada modo (traslacional, rotacional, vibracional) se calculan utilizando la distribución de Boltzmann:</p>
-
-<p style="font-size: 0.9em;">\[E_{promedio} = \frac{\sum_n E_n \exp(-E_n/k_BT)}{\sum_n \exp(-E_n/k_BT)}\]</p>
-
-<p style="font-size: 0.9em;">Donde \(E_n\) son los niveles de energía para cada modo, y la suma se realiza sobre todos los niveles considerados (cuantos más, mejor).</p>
-<ul style="font-size: 0.9em;">
-    <li>Traslacional (\(E_n = \frac{n^2h^2}{8mL^2}\)) : 1000 niveles (n = 1 a 1000)</li>
-    <li>Rotacional (\(E_J = \frac{J(J+1)\hbar^2}{2I}\)) : 1001 niveles (J = 0 a 1000)</li>
-    <li>Vibracional (\(E_n = (n + \frac{1}{2})\hbar\omega\)) : 501 niveles (n = 0 a 500)</li>
-</ul>
-<p style="font-size: 0.9em;">Existe otra forma de calcular \(C_V\) utilizando las fluctuaciones de energía:</p>
-
-<p style="font-size: 0.9em;">\[C_V = \frac{1}{k_BT^2} (\langle E^2 \rangle - \langle E \rangle^2)\]</p>
-
-<p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
-
-
-        </details>
-
+            <!-- Agregar título de explicación -->
+            <h2>Explicación:</h2>
+            <div id="collapsible-text">
+                <p>
+                    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado.
+                </p>
+                <h3>• Gráfico superior</h3>
+                <p>
+                    Muestra \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) en función de T, siendo \(\langle E \rangle\) la energía media de la partícula. Las líneas horizontales punteadas representan los límites clásicos de \(C_V\) para diferentes grados de libertad activos.     
+                </p>
+                <h4>Comportamiento con la temperatura</h4>
+                <p>
+                    <strong>Bajas temperaturas:</strong> Solo los niveles traslacionales más bajos son accesibles debido a su menor separación energética. \(C_V\) es bajo ya que solo estos niveles pueden almacenar energía.
+                </p>
+                <p>
+                    <strong>Temperaturas intermedias:</strong> Los niveles rotacionales se vuelven accesibles, aumentando \(C_V\) ya que más estados pueden almacenar energía con el mismo incremento de T.
+                </p>
+                <p>
+                    <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando \(C_V\) a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energía.
+                </p>
+                <h4>Límites clásicos</h4>
+                <p>
+                    A altas temperaturas, \(C_V\) se aproxima a los límites clásicos:
+                </p>
+                <ul>
+                    <li>\(\frac{3}{2} k_B\): Solo traslación activa</li>
+                    <li>\(\frac{5}{2} k_B\): Traslación y rotación activas</li>
+                    <li>\(\frac{7}{2} k_B\): Traslación, rotación y vibración activas</li>
+                </ul>
+                
+                <h3>• Gráfico inferior</h3>
+                <p>
+                    Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, \(e^{-E/k_BT}\).
+                </p>
+                
+                <p>
+                    El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de energía del gráfico inferior:
+                </p>
+                <ul>
+                    <li>Activado: La escala se ajusta con la temperatura, manteniendo visible la línea \(k_BT\).</li>
+                    <li>Desactivado: La escala se fija, permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
+                </ul>
+                
+                <h3>• Niveles de energía</h3>
+                <p>Los niveles de energía para cada modo se calculan como sigue:</p>
+                <ul>
+                    <li>Traslacional: \(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)
+                    <br><br>
+                    \(n_x, n_y, n_z\) = números cuánticos (\(n \geq 1\), enteros)
+                    <br>\(h\) = constante de Planck
+                    <br>\(m = 3.3210781332 \times 10^{-27}\) kg (masa de H₂)
+                    <br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
+                    </li>
+                    <br>
+                    <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
+                    <br><br>
+                    \(J\) = número cuántico rotacional (\(J \geq 0\), entero)
+                    <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
+                    <br>\(I = 4.61 \times 10^{-48}\) kg·m² (momento de inercia de H₂)
+                    </li>
+                    <br>
+                    <li>Vibracional: \(E_n = \left(n + \frac{1}{2}\right)\hbar\omega\)
+                    <br><br>
+                    \(n\) = número cuántico vibracional (\(n \geq 0\), entero)
+                    <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
+                    <br>\(\omega = 8.28 \times 10^{14}\) rad/s (frecuencia angular del oscilador)
+                    </li>
+                </ul>
+                
+                <p style="font-size: 0.9em;"><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
+                
+                <ol style="font-size: 0.9em;">
+                    <li>Se calcula la energía en una dimensión usando la ecuación: \(E_n = \frac{n^2h^2}{8mL^2}\)</li>
+                    <li>Este resultado se multiplica por 3 para el cómputo de \(C_V\), asumiendo que las componentes x, y, y z son independientes.</li>
+                </ol>
+                
+                <p style="font-size: 0.9em;">Esta aproximación difiere del cálculo 3D riguroso, utilizando:</p>
+                
+                <p style="font-size: 0.9em;">\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)</p>
+                
+                <p style="font-size: 0.9em;">Las principales implicaciones de esta simplificación son:</p>
+                
+                <ul style="font-size: 0.9em;">
+                    <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía traslacional, lo que reduce drásticamente el costo computacional.</li>
+                    <li><strong>Visualización:</strong> La menor densidad de niveles traslacionales permite una representación visual más clara y menos saturada. Solo se representan los niveles correspondientes a \(E_n = \frac{n^2h^2}{8mL^2}\).</li>
+                    <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, esta aproximación podría resultar en un \(C_V\) ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
+                </ul>
+                <p style="font-size: 0.9em;">A pesar de la aproximación usada, la separación entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva \(C_V\) se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
+                <p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de \(C_V\):</strong> En esta simulación, \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) se aproxima numéricamente usando la fórmula:</p>
+                
+                <p style="font-size: 0.9em;">\[C_V = \frac{1}{k_B} \cdot \frac{3 \Delta E_{\text{trans}} + \Delta E_{\text{rot}} + \Delta E_{\text{vib}}}{\Delta T}\]</p>
+                
+                <p style="font-size: 0.9em;">Donde:</p>
+                <ul style="font-size: 0.9em;">
+                    <li>\(k_B\) es la constante de Boltzmann</li>
+                    <li>\(\Delta E = E[i] - E[i-1]\) (cambio en la energía promedio computado para cada modo (traslacional, rotacional, vibracional))</li>
+                    <li>\(\Delta T = T[i] - T[i-1]\) (cambio en la temperatura)</li>
+                    <li>i representa el índice de la temperatura en el array de temperaturas. \(T[i]\) y \(T[i-1]\) son dos temperaturas sucesivas.</li>
+                </ul>
+                
+                <p style="font-size: 0.9em;">Los promedios de energía para cada modo (traslacional, rotacional, vibracional) se calculan utilizando la distribución de Boltzmann:</p>
+                
+                <p style="font-size: 0.9em;">\[E_{\text{promedio}} = \frac{\sum_n E_n \exp\left(-\frac{E_n}{k_BT}\right)}{\sum_n \exp\left(-\frac{E_n}{k_BT}\right)}\]</p>
+                
+                <p style="font-size: 0.9em;">Donde \(E_n\) son los niveles de energía para cada modo, y la suma se realiza sobre todos los niveles considerados (cuantos más, mejor).</p>
+                <ul style="font-size: 0.9em;">
+                    <li>Traslacional (\(E_n = \frac{n^2h^2}{8mL^2}\)) : 1000 niveles (n = 1 a 1000)</li>
+                    <li>Rotacional (\(E_J = \frac{J(J+1)\hbar^2}{2I}\)) : 1001 niveles (J = 0 a 1000)</li>
+                    <li>Vibracional (\(E_n = \left(n + \frac{1}{2}\right)\hbar\omega\)) : 501 niveles (n = 0 a 500)</li>
+                </ul>
+                <p style="font-size: 0.9em;">Existe otra forma de calcular \(C_V\) utilizando las fluctuaciones de energía:</p>
+                
+                <p style="font-size: 0.9em;">\[C_V = \frac{1}{k_BT^2} \left(\langle E^2 \rangle - \langle E \rangle^2\right)\]</p>
+                
+                <p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -499,13 +511,15 @@
             renderMathInElement(document.body, {
                 delimiters: [
                     {left: "$$", right: "$$", display: true},
-                    {left: "$", right: "$", display: false}
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false}
                 ]
             });
         });
     </script>
 
-    <!-- Tu script JavaScript existente -->
+    <!-- Script JavaScript Completo -->
     <script>
         // Detección de dispositivo móvil (declarado como variable global)
         var isMobile = window.matchMedia("(max-width: 600px)").matches;
@@ -586,10 +600,87 @@
         }
 
         // Definir los márgenes del gráfico en función del dispositivo
-        let plotMargins = isMobile ? { t: 5, l: 60, r: 20, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
+        let plotMargins = isMobile ? { t: 5, l: 50, r: 30, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
 
         // Definir el tamaño de fuente para las anotaciones
         let annotationFontSize = isMobile ? 10 : 12;
+
+        // Función para obtener anotaciones según dispositivo
+        function getAnnotations() {
+            if (isMobile) {
+                return [
+                    {
+                        x: -0.02,
+                        y: 3.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>7/2 K<sub>B</sub></b>',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 2.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>5/2 K<sub>B</sub></b>',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 1.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>3/2 K<sub>B</sub></b>',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    }
+                ];
+            } else {
+                return [
+                    {
+                        x: -0.02,
+                        y: 3.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 2.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 1.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    }
+                ];
+            }
+        }
 
         // Graficar Cv vs T
         let traceCv = {
@@ -652,41 +743,7 @@
             },
             margin: plotMargins,
             shapes: horizontal_lines,
-            annotations: [
-                {
-                    x: -0.02,
-                    y: 3.5,
-                    xref: 'paper',
-                    yref: 'y',
-                    text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
-                    showarrow: false,
-                    font: { size: annotationFontSize },
-                    xanchor: 'left',
-                    yanchor: 'bottom'
-                },
-                {
-                    x: -0.02,
-                    y: 2.5,
-                    xref: 'paper',
-                    yref: 'y',
-                    text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
-                    showarrow: false,
-                    font: { size: annotationFontSize },
-                    xanchor: 'left',
-                    yanchor: 'bottom'
-                },
-                {
-                    x: -0.02,
-                    y: 1.5,
-                    xref: 'paper',
-                    yref: 'y',
-                    text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
-                    showarrow: false,
-                    font: { size: annotationFontSize },
-                    xanchor: 'left',
-                    yanchor: 'bottom'
-                }
-            ]
+            annotations: getAnnotations()
         };
 
         let configCv = {
@@ -834,7 +891,7 @@
 
             svg.selectAll('.label').remove();
 
-            const labelYPosition = yScale.range()[1] + -5;
+            const labelYPosition = yScale.range()[1] - 5;
 
             svg.append('text')
                 .attr('class', 'label')
@@ -900,7 +957,7 @@
                     arrowDirection = 'right';
                 }
 
-                let labelY = yScale(E_label_energy) -9; // Ajusta la posición vertical según sea necesario
+                let labelY = yScale(E_label_energy) - 9; // Ajusta la posición vertical según sea necesario
 
                 // Agregar el texto en dos líneas con subíndice
                 let textElement = svg.append('text')
@@ -1105,15 +1162,18 @@
             annotationFontSize = isMobile ? 10 : 12;
 
             // Actualizar los márgenes del gráfico
-            plotMargins = isMobile ? { t: 10, l: 60, r: 20, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
+            plotMargins = isMobile ? { t: 5, l: 60, r: 20, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
 
-            // Actualizar el layout del gráfico con los nuevos márgenes
-            layoutCv.margin = plotMargins;
+            // Actualizar las anotaciones
+            layoutCv.annotations = getAnnotations();
 
             // Actualizar el tamaño de fuente de las anotaciones
             layoutCv.annotations.forEach(annotation => {
                 annotation.font.size = annotationFontSize;
             });
+
+            // Actualizar el layout del gráfico
+            layoutCv.margin = plotMargins;
 
             // Actualizar el gráfico
             Plotly.relayout('cv-plot', layoutCv);
@@ -1125,20 +1185,17 @@
         updateTemperature();
         updateAutoScale();
 
-        // Inicializar KaTeX al abrir el detalle
-        document.getElementById('collapsible-text').addEventListener('toggle', function(event) {
-            if (event.target.open) {
-                renderMathInElement(event.target, {
-                    delimiters: [
-                        {left: "$$", right: "$$", display: true},
-                        {left: "\\[", right: "\\]", display: true},
-                        {left: "\\(", right: "\\)", display: false},
-                        {left: "$", right: "$", display: false}
-                    ],
-                    throwOnError: false
-                });
-            }
-        });
+        // Remover el evento 'toggle' de <details> ya que no se usa más
+        // Ya no es necesario, así que no se incluye
+
+        // Función para dibujar los niveles de energía inicialmente
+        function initializeEnergyLevels() {
+            updateEnergyLevels();
+            updateParticles(currentT);
+        }
+
+        // Llamar a la función de inicialización después de cargar todo
+        initializeEnergyLevels();
     </script>
 </body>
 </html>
