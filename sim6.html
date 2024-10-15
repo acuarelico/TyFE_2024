@@ -391,7 +391,7 @@
             <h2>Explicación:</h2>
             <div id="collapsible-text">
                 <p>
-                    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado. Ver limitaciones de este modelo al final del texto.
+                    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado que ajusta la escala de visualización). Ver limitaciones de este modelo al final del texto.
                 </p>
                 <h3>• Gráfico superior</h3>
                 <p>
@@ -423,11 +423,11 @@
                 </p>
                 
                 <p>
-                    El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de energía del gráfico inferior:
+                    El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de visualización de los niveles de energía:
                 </p>
                 <ul>
-                    <li>Activado: La escala se ajusta con la temperatura, manteniendo visible la línea \(k_BT\).</li>
-                    <li>Desactivado: La escala se fija, permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
+                    <li>Activado: La escala de visualización se ajusta dinámicamente con la temperatura, manteniendo visible la línea \(k_BT\).</li>
+                    <li>Desactivado: La escala se fija (se congela la visualización de los niveles), permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
                 </ul>
                 
                 <h3>• Niveles de energía</h3>
@@ -489,16 +489,25 @@
 <div style="font-size: 0.9em;">
     <p>Este modelo, aunque útil para comprender el comportamiento general de la capacidad calorífica de moléculas diatómicas, tiene varias limitaciones importantes:</p>
     <ul>
-        <li><strong>Gas ideal a baja presión:</strong> Se asume un gas a baja presión en un volumen fijo, lo cual puede no ser representativo de todas las condiciones experimentales.</li>
-        <li><strong>Fase gaseosa constante:</strong> Se supone que la molécula se mantiene en fase gaseosa en todo el rango de temperaturas.</li>
-        <li><strong>No disociación:</strong> El modelo no considera la posibilidad de disociación molecular a altas temperaturas donde se perdería el carácter diatómico.</li>
-        <li><strong>Independencia de niveles energéticos:</strong> Se asume que los niveles energéticos (traslacional, rotacional y vibracional) son independientes entre sí. Esta aproximación es menos precisa a altas temperaturas, donde puede haber un acoplamiento significativo entre estos modos.</li>
-        <li><strong>Simplificación de niveles traslacionales:</strong> Se utiliza una aproximación unidimensional (la que se visualiza) \(E_n = \frac{n^2h^2}{8mL^2}\), en lugar del cálculo 3D completo (\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)). Esto reduce significativamente el costo computacional al generar menos niveles de energía (del orden de N en lugar de N³), y mejora la visualización al disminuir la densidad de niveles en el gráfico. Para el cómputo de \(C_V\) se considera \(3E_n\) para tener en cuenta la energía de los 3 modos traslacionales. Esto, puede llevar a ligeras imprecisiones en \(C_V\) a temperaturas muy bajas debido a la menor densidad de niveles. Sin embargo, con esta aproximación, la separación entre niveles traslacionales sigue siendo mucho menor que la de los niveles rotacionales y vibracionales, manteniendo la curva \(C_V\) prácticamente idéntica al que se obtendría con el modelo 3D completo.</li>
-        <li><strong>Aproximación armónica:</strong> Para las vibraciones, se utiliza un modelo de oscilador armónico, que es menos preciso para niveles de energía altos. Un modelo más realista sería un oscilador anarmónico.</li>
-        <li><strong>Número fijo de niveles:</strong> Se utiliza un número fijo de niveles energéticos para cada modo, lo cual es una aproximación, ya que en realidad el número de niveles accesibles aumenta con la temperatura.</li>
-        <li><strong>Aproximación de Born-Oppenheimer:</strong> Esta aproximación asume que el movimiento de los electrones y los núcleos pueden tratarse por separado debido a la gran diferencia en sus masas. Permite simplificar significativamente los cálculos de estructura molecular y espectros vibracionales. Sin embargo, puede fallar en situaciones donde los estados electrónicos están muy próximos en energía o cuando hay fuertes acoplamientos vibrónico-electrónicos, como en ciertas reacciones químicas o en moléculas excitadas. En estos casos, los movimientos electrónicos y nucleares no pueden considerarse independientes, lo que puede afectar la precisión de los cálculos de energía y, por ende, la capacidad calorífica.</li>
         
-        <li><strong>Rotor rígido:</strong> El tratamiento de la molécula como un rotor rígido puede requerir correcciones a altas temperaturas donde la distorsión centrífuga se vuelve significativa.</li>
+<li><strong>Gas ideal a baja presión:</strong> Se asume un gas a baja presión en un volumen fijo, lo cual puede no ser representativo de todas las condiciones experimentales.</li>
+        
+<li><strong>Fase gaseosa constante:</strong> Se supone que la molécula se mantiene en fase gaseosa en todo el rango de temperaturas.</li>
+       
+ <li><strong>No disociación:</strong> El modelo no considera la posibilidad de disociación molecular a altas temperaturas donde la molécula diatómica se rompería.</li>
+        
+<li><strong>Independencia de niveles energéticos:</strong> Se asume que los niveles energéticos (traslacional, rotacional y vibracional) son independientes entre sí. Esta aproximación es menos precisa a altas temperaturas, donde puede haber un acoplamiento significativo entre estos modos.</li>
+ <li><strong>Número fijo de niveles:</strong> Se utiliza un número fijo de niveles energéticos para cada modo, lo cual es una aproximación. En realidad el número de niveles accesibles aumenta con la temperatura.</li>
+        
+<li><strong>Simplificación de niveles traslacionales:</strong> Se utiliza una aproximación unidimensional (la que se visualiza) \(E_n = \frac{n^2h^2}{8mL^2}\), en lugar del cálculo 3D completo (\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)). Esto reduce significativamente el costo computacional al generar menos niveles de energía (del orden de N en lugar de N³), y mejora la visualización al disminuir la densidad de niveles en el gráfico. Para el cómputo de \(C_V\) se considera \(3E_n\) para tener en cuenta la energía de los 3 modos traslacionales. Esta aproximación puede llevar a ligeras imprecisiones en \(C_V\) a temperaturas muy bajas debido a la menor densidad de niveles. Sin embargo, con este modelo, la separación entre niveles traslacionales sigue siendo mucho menor que la de los niveles rotacionales y vibracionales, manteniendo la curva \(C_V\) prácticamente idéntica al que se obtendría con el modelo 3D completo.</li>
+        
+<li><strong>Aproximación armónica:</strong> Para las vibraciones, se utiliza un modelo de oscilador armónico, que es menos preciso para niveles de energía altos. Un modelo más realista sería un oscilador anarmónico.</li>
+       
+<li><strong>Rotor rígido:</strong> El tratamiento de la molécula como un rotor rígido puede requerir correcciones a altas temperaturas donde la distorsión centrífuga se vuelve significativa.</li>
+       
+<li><strong>Aproximación de Born-Oppenheimer:</strong> Esta aproximación asume que el movimiento de los electrones y los núcleos pueden tratarse por separado debido a la gran diferencia en sus masas. Permite simplificar significativamente los cálculos de estructura molecular y espectros vibracionales. Sin embargo, puede fallar en situaciones donde los estados electrónicos están muy próximos en energía o cuando hay fuertes acoplamientos vibrónico-electrónicos, como en ciertas reacciones químicas o en moléculas excitadas. En estos casos, los movimientos electrónicos y nucleares no pueden considerarse independientes, lo que puede afectar la precisión de los cálculos de energía y, por ende, la capacidad calorífica.</li>
+        
+       
           
     <p>Referencias:</p>
     <ol>
