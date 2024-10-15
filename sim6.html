@@ -506,8 +506,9 @@
 <li><strong>Aproximación armónica:</strong> Para las vibraciones, se utiliza un modelo de oscilador armónico, que es menos preciso para niveles de energía altos. Un modelo más realista sería un oscilador anarmónico.</li>
               
 <li><strong>Aproximación de Born-Oppenheimer:</strong> Esta aproximación asume que el movimiento de los electrones y los núcleos pueden tratarse por separado debido a la gran diferencia en sus masas. Permite simplificar significativamente los cálculos de estructura molecular y espectros vibracionales. Sin embargo, puede fallar en situaciones donde los estados electrónicos están muy próximos en energía o cuando hay fuertes acoplamientos vibrónico-electrónicos, como en ciertas reacciones químicas o en moléculas excitadas. En estos casos, los movimientos electrónicos y nucleares no pueden considerarse independientes, lo que puede afectar la precisión de los cálculos de energía y, por ende, la capacidad calorífica.</li>
-       
    
+   
+    
           
     <p>Referencias:</p>
     <ol>
@@ -795,6 +796,11 @@
             .attr('height', '100%')
             .attr('preserveAspectRatio', 'xMidYMid meet');
 
+        // Crear grupos SVG para niveles, partículas y anotaciones
+        const levelsGroup = svg.append('g').attr('class', 'levels-group');
+        const particlesGroup = svg.append('g').attr('class', 'particles-group');
+        const annotationsGroup = svg.append('g').attr('class', 'annotations-group');
+
         // Escalas
         let xScale, yScale;
 
@@ -861,7 +867,8 @@
         }
 
         function drawEnergyLevels(E_max) {
-            svg.selectAll('.energy-level').remove();
+            // Limpiar niveles de energía
+            levelsGroup.selectAll('.energy-level').remove();
 
             const totalWidth = 3;
             const groupGap = 0.2; // Espacio entre grupos
@@ -877,7 +884,7 @@
                 for (let n = 0; n < max_plot; n++) {
                     let yPosition = yScale(En[n]);
                     if (yPosition >= 30 && yPosition <= yScale.range()[0]) {
-                        svg.append('line')
+                        levelsGroup.append('line')
                             .attr('class', 'energy-level')
                             .attr('x1', xScale(start))
                             .attr('x2', xScale(start + groupWidth))
@@ -902,34 +909,36 @@
             drawLevels(En_rot, xPositions[1], j_rot_max_plot + 1);
             drawLevels(En_vib, xPositions[2], n_vib_max_plot + 1);
 
-            svg.selectAll('.label').remove();
+            // Limpiar etiquetas de modos
+            levelsGroup.selectAll('.label').remove();
 
             const labelYPosition = yScale.range()[1] - 5;
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[0] + groupWidth / 2))
                 .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Traslacional (T)');
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[1] + groupWidth / 2))
                 .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Rotacional (R)');
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[2] + groupWidth / 2))
                 .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Vibracional (V)');
 
-            svg.selectAll('.y-axis-label').remove();
+            // Limpiar etiquetas del eje Y
+            levelsGroup.selectAll('.y-axis-label').remove();
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'y-axis-label')
                 .attr('x', xScale(-0.2))
                 .attr('y', yScale(yScale.domain()[1] / 2))
@@ -938,8 +947,8 @@
                 .text('Energía');
 
             // Agregar el label de E = k_B T
-            svg.selectAll('.e-max-label').remove();
-            svg.selectAll('.e-max-arrow').remove();
+            annotationsGroup.selectAll('.e-max-label').remove();
+            annotationsGroup.selectAll('.e-max-arrow').remove();
 
             if (updateEmaxLabel) {
                 // Calcular E_label_energy = kB * currentT
@@ -973,7 +982,7 @@
                 let labelY = yScale(E_label_energy) - 9; // Ajusta la posición vertical según sea necesario
 
                 // Agregar el texto en dos líneas con subíndice
-                let textElement = svg.append('text')
+                let textElement = annotationsGroup.append('text')
                     .attr('class', 'e-max-label')
                     .attr('x', labelX)
                     .attr('y', labelY)
@@ -1000,7 +1009,7 @@
 
                 if (arrowDirection === 'right') {
                     arrowX = labelX + arrowOffset; // Flecha hacia la derecha
-                    svg.append('line')
+                    annotationsGroup.append('line')
                         .attr('class', 'e-max-arrow')
                         .attr('x1', arrowX)
                         .attr('y1', arrowY)
@@ -1009,13 +1018,13 @@
                         .attr('stroke', 'black')
                         .attr('stroke-width', 0.5);
 
-                    svg.append('polygon')
+                    annotationsGroup.append('polygon')
                         .attr('class', 'e-max-arrow')
                         .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
                         .attr('fill', 'gray');
                 } else if (arrowDirection === 'left') {
                     arrowX = labelX - arrowOffset; // Flecha hacia la izquierda
-                    svg.append('line')
+                    annotationsGroup.append('line')
                         .attr('class', 'e-max-arrow')
                         .attr('x1', arrowX)
                         .attr('y1', arrowY)
@@ -1024,16 +1033,17 @@
                         .attr('stroke', 'black')
                         .attr('stroke-width', 0.5);
 
-                    svg.append('polygon')
+                    annotationsGroup.append('polygon')
                         .attr('class', 'e-max-arrow')
                         .attr('points', `${arrowX - 5},${arrowY - 3} ${arrowX - 5},${arrowY + 3} ${arrowX - 14},${arrowY}`)
                         .attr('fill', 'gray');
                 }
 
-                // **Nueva Línea: Mover las anotaciones al frente en móviles**
+                // **Nuevo: Asegurar que las anotaciones estén por encima de las partículas**
+                // Al usar grupos separados y añadir anotaciones al final, ya deberían estar por encima.
+                // Sin embargo, para mayor seguridad, podemos ordenar los grupos en el SVG.
                 if (isMobile) {
-                    svg.selectAll('.e-max-label').raise();
-                    svg.selectAll('.e-max-arrow').raise();
+                    annotationsGroup.raise();
                 }
             }
 
@@ -1074,7 +1084,8 @@
             let Z_vib = P_vib.reduce((a, b) => a + b, 0);
             P_vib = P_vib.map(p => p / Z_vib);
 
-            particles.forEach(p => p.remove());
+            // Limpiar partículas existentes
+            particlesGroup.selectAll('.particle').remove();
             particles = [];
 
             const totalWidth = 3;
@@ -1101,7 +1112,7 @@
                         let y = yPosition;
                         let color = energyToColor(energy, yScale.domain()[1]);
 
-                        let particle = svg.append('circle')
+                        let particle = particlesGroup.append('circle')
                             .attr('class', 'particle')
                             .attr('cx', x)
                             .attr('cy', y)
