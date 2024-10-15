@@ -434,29 +434,29 @@
                 
                 <h3>• Niveles de energía</h3>
                 <p>Los niveles de energía para cada modo se calculan como sigue:</p>
-                <ul>
-                    <li>Traslacional( x3): \(E_n = \frac{n^2h^2}{8mL^2}\)
-<br><br>
-\(n\) = número cuántico (\(n \geq 1\), entero)
-<br>\(h\) = constante de Planck
-<br>\(m = 3.3210781332 \times 10^{-27}\) kg (masa de H₂)
-<br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
-</li>
-                    <br>
-                    <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
-                    <br><br>
-                    \(J\) = número cuántico rotacional (\(J \geq 0\), entero)
-                    <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
-                    <br>\(I = 4.61 \times 10^{-48}\) kg·m² (momento de inercia de H₂)
-                    </li>
-                    <br>
-                    <li>Vibracional: \(E_n = \left(n + \frac{1}{2}\right)\hbar\omega\)
-                    <br><br>
-                    \(n\) = número cuántico vibracional (\(n \geq 0\), entero)
-                    <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
-                    <br>\(\omega = 8.28 \times 10^{14}\) rad/s (frecuencia angular del oscilador)
-                    </li>
-                </ul>
+               <ul>
+    <li>Traslacional (x3): \(E_n = \frac{n^2h^2}{8mL^2}\)
+        <br><br>
+        \(n\) = número cuántico (\(n \geq 1\), entero)
+        <br>\(h\) = constante de Planck
+        <br>\(m = 5.3134624540 \times 10^{-26}\) kg (masa de O₂)
+        <br>\(L = 1 \times 10^{-9}\) m (longitud de la caja)
+    </li>
+    <br>
+    <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
+        <br><br>
+        \(J\) = número cuántico rotacional (\(J \geq 0\), entero)
+        <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
+        <br>\(I = 1.9 \times 10^{-46}\) kg·m² (momento de inercia de O₂)
+    </li>
+    <br>
+    <li>Vibracional: \(E_n = \left(n + \frac{1}{2}\right)\hbar\omega\)
+        <br><br>
+        \(n\) = número cuántico vibracional (\(n \geq 0\), entero)
+        <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
+        <br>\(\omega = 4.74 \times 10^{13}\) rad/s (frecuencia angular del oscilador para O₂)
+    </li>
+</ul>
                
                 <p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de \(C_V\):</strong> En esta simulación, \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) se aproxima numéricamente usando la fórmula:</p>
                 
@@ -811,7 +811,7 @@ const E_max_T005K = 20 * kB * 0.05;
 let E_fixed_max = null;
 
 // Partículas
-const num_particles = 300;
+const num_particles = 1000;
 let particles = [];
 
 // Variables globales
@@ -1118,7 +1118,7 @@ function updateParticles(T) {
                     .attr('class', 'particle')
                     .attr('cx', x)
                     .attr('cy', y)
-                    .attr('r', 4)
+                    .attr('r', 2)
                     .attr('fill', color);
                 particles.push(particle);
             }
