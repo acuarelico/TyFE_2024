@@ -3,11 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>Capacidad Calorífica por Partícula</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Incluir Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- Incluir D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+     
+    <!-- Incluir KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"></script>
+
     <style>
+        /* Variables CSS para ajustes globales */
+        :root {
+            /* Tamaño del título */
+            --title-font-size: 28px;
+            /* Tamaño del icono */
+            --icon-width: 150px;
+            --icon-height: auto;
+            /* Tamaño de los gráficos */
+            --plot-height: 300px;
+            /* Tamaño del texto en el gráfico de Cv */
+            --cv-annotations-font-size: 12px;
+            /* Tamaño del slider */
+            --slider-thumb-size: 24px;
+            --slider-track-height: 8px;
+            /* Posición del botón de autoescalado */
+            --auto-scale-button-position: relative;
+            --auto-scale-button-top: 0;
+            --auto-scale-button-right: 0;
+            /* Nuevas variables para ajustar el icono */
+            --icon-top: 0;
+            --icon-left: 0;
+        }
+
         /* Estilos generales */
         html, body {
             height: 100%;
@@ -15,6 +45,7 @@
             padding: 10px;
             font-family: Arial, sans-serif;
             background-color: #ffffff;
+            overflow-x: hidden;
         }
         /* Contenedor principal */
         #main-container {
@@ -33,12 +64,16 @@
             text-align: center;
             flex: 1;
             margin: 0;
+            font-size: var(--title-font-size); /* Tamaño del título */
         }
         /* Estilo para el icono */
         #icono {
-            width: 150px;
-            height: auto;
+            width: var(--icon-width); /* Tamaño del icono */
+            height: var(--icon-height);
             margin-right: 10px;
+            position: var(--icon-position, static); /* Posición del icono */
+            top: var(--icon-top);
+            left: var(--icon-left);
         }
         /* Contenedor de los gráficos */
         #plots {
@@ -53,7 +88,7 @@
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 20px;
-            height: 300px;
+            height: var(--plot-height); /* Altura de los gráficos */
         }
         /* Sobrescribir el estilo del cursor en los elementos internos de Plotly */
         #cv-plot .cursor-crosshair,
@@ -74,6 +109,7 @@
             margin-top: 10px;
             margin-bottom: 10px;
             flex-wrap: wrap;
+            position: relative; /* Para posicionar el botón de autoescalado */
         }
         /* Envoltorio del slider de temperatura */
         #temp-slider-wrapper {
@@ -90,7 +126,7 @@
             padding: 0;
             -webkit-appearance: none;
             appearance: none;
-            height: 30px;
+            height: var(--slider-track-height); /* Altura de la pista del slider */
             background: transparent;
             position: relative;
             z-index: 1;
@@ -98,19 +134,19 @@
         /* Estilo de la pista del slider */
         #temp-slider::-webkit-slider-runnable-track {
             width: 100%;
-            height: 8px;
+            height: var(--slider-track-height); /* Altura de la pista del slider */
             background: #ddd;
             border-radius: 4px;
         }
         #temp-slider::-moz-range-track {
             width: 100%;
-            height: 8px;
+            height: var(--slider-track-height);
             background: #ddd;
             border-radius: 4px;
         }
         #temp-slider::-ms-track {
             width: 100%;
-            height: 8px;
+            height: var(--slider-track-height);
             background: #ddd;
             border-radius: 4px;
             border: none;
@@ -120,24 +156,24 @@
         #temp-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: var(--slider-thumb-size); /* Tamaño del pulgar del slider */
+            height: var(--slider-thumb-size);
             background: #4CAF50;
             border-radius: 50%;
             cursor: pointer;
-            margin-top: -8px;
+            margin-top: calc(-0.5 * var(--slider-thumb-size) + 0.5 * var(--slider-track-height));
         }
         #temp-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
+            width: var(--slider-thumb-size);
+            height: var(--slider-thumb-size);
             background: #4CAF50;
             border: none;
             border-radius: 50%;
             cursor: pointer;
         }
         #temp-slider::-ms-thumb {
-            width: 24px;
-            height: 24px;
+            width: var(--slider-thumb-size);
+            height: var(--slider-thumb-size);
             background: #4CAF50;
             border: none;
             border-radius: 50%;
@@ -148,6 +184,9 @@
             display: flex;
             align-items: center;
             margin-top: 10px;
+            position: var(--auto-scale-button-position); /* Posición del botón de autoescalado */
+            top: var(--auto-scale-button-top);
+            right: var(--auto-scale-button-right);
         }
         #auto-scale-checkbox {
             -webkit-appearance: none;
@@ -188,69 +227,35 @@
         .particle {
             pointer-events: none;
         }
-        /* Estilo para el texto desplegable */
-        #collapsible-text {
-            margin-top: 60px;
+        /* Estilo para el contenedor de la explicación */
+        #collapsible-text-container {
+            width: 100%;
+            box-sizing: border-box;
+            /* Eliminar overflow-x para evitar scroll horizontal innecesario */
+            overflow-x: hidden;
+            /* Asegurarse de que el contenedor crece con el contenido */
+            overflow-y: visible;
+            margin: 50px auto 0 auto; /* Ajuste de márgenes */
             font-size: 14px;
             max-width: 800px;
-            margin: 20px auto 0 auto;
+            word-wrap: break-word; /* Previene overflow horizontal */
+            overflow-wrap: break-word;
         }
-        #collapsible-text summary {
-            margin-top: 50px;
-            cursor: pointer;
-            list-style: none;
-            font-weight: bold;
-            font-size: 18px;
+        #collapsible-text-container h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
         }
-        #collapsible-text p {
-            margin: 0;
-            padding: 10px 0;
-            text-align: justify;
+        #collapsible-text-container p, 
+        #collapsible-text-container h3, 
+        #collapsible-text-container h4, 
+        #collapsible-text-container ul, 
+        #collapsible-text-container ol {
+            margin: 20px 0px 0px 0px; /* Ajusta el margen superior */
         }
-        /* Ajustes para dispositivos móviles */
-        @media (max-width: 600px) {
-            #header {
-                flex-direction: column;
-                align-items: center;
-            }
-            #icono {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            #slider-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            #temp-slider-wrapper {
-                width: 80%;
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-            #auto-scale-container {
-                margin-top: 15px;
-            }
-            #auto-scale-checkbox {
-                width: 40px;
-                height: 40px;
-            }
-            #auto-scale-checkbox:checked::before {
-                font-size: 24px;
-                line-height: 40px;
-            }
-            label[for="auto-scale-checkbox"] {
-                font-size: 20px;
-            }
-            #collapsible-text summary {
-            font-size: 44px !important;            
-            padding: 10px 0;        
-            }
-            #collapsible-text {
-                width: 100%;
-                margin: 50px 0 0 0;
-            }
-            #temp-value {
-                font-size: 16px;
-            }
+        /* Ajustes para fórmulas matemáticas en dispositivos móviles */
+        #collapsible-text-container .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         /* Estilo para el texto de E_max */
         .e-max-label {
@@ -261,6 +266,100 @@
         .e-max-arrow {
             stroke: gray;
             fill: gray;
+        }
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 600px) {
+            /* Variables CSS para ajustes en móviles */
+            :root {
+                --title-font-size: 12px; /* Tamaño del título en móviles */
+                --icon-width: 70px; /* Tamaño del icono en móviles */
+                --icon-height: auto;
+                --icon-top-mobile: -10px; /* Ajusta la posición vertical del icono */
+                --icon-left-mobile: 0px; /* Ajusta la posición horizontal del icono */
+                --plot-height: 200px; /* Altura de los gráficos en móviles */
+                --cv-annotations-font-size: 10px; /* Tamaño del texto en el gráfico de Cv en móviles */
+                --slider-thumb-size: 20px; /* Tamaño del slider en móviles */
+                --slider-track-height: 10px;
+                --auto-scale-button-top: 15px; /* Posición del botón de autoescalado en móviles */
+            }
+            body {
+                font-size: 12px;
+                padding: 5px;
+            }
+            h1 {
+                font-size: var(--title-font-size); /* Tamaño del título en móviles */
+                line-height: 1.2;
+            }
+            #header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+            }
+#main-container {
+        margin-top: 20px; /* Puedes ajustar este valor según tus necesidades */
+    }
+
+            #icono {
+                margin-right: 10px;
+                margin-bottom: 0;
+                width: var(--icon-width); /* Tamaño del icono en móviles */
+                height: var(--icon-height-mobile);
+                position: absolute;
+                top: var(--icon-top-mobile);
+                left: var(--icon-left-mobile);
+            }
+            #collapsible-text-container {
+                width: 100%;
+                margin: 20px 0px 0px 0px;
+            }
+            #cv-plot, #energy-levels {
+                height: var(--plot-height); /* Altura de los gráficos en móviles */
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            #slider-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            #temp-slider-wrapper {
+                width: 80%;
+                margin-right: 5px;
+                margin-left: 35px;
+                margin-bottom: 0px;
+            }
+            #auto-scale-container {
+                margin-top: var(--auto-scale-button-top); /* Posición del botón de autoescalado en móviles */
+            }
+            #auto-scale-checkbox {
+                width: 20px;
+                height: 20px;
+            }
+            #auto-scale-checkbox:checked::before {
+                font-size: 18px;
+                line-height: 18px;
+            }
+            label[for="auto-scale-checkbox"] {
+                font-size: 14px;
+            }
+            #collapsible-text-container h2 {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            #collapsible-text-container p, 
+            #collapsible-text-container h3, 
+            #collapsible-text-container h4, 
+            #collapsible-text-container ul, 
+            #collapsible-text-container ol {
+                margin: 10px 0px 0px 0px; /* Ajusta el margen superior */        
+            }
+            #temp-value {
+                font-size: 14px;
+            }
+            /* Reducir el tamaño de los textos en el gráfico superior */
+            #cv-plot .ytick text,
+            #cv-plot .xtick text {
+                font-size: var(--cv-annotations-font-size) !important; /* Tamaño del texto en el gráfico de Cv en móviles */
+            }
         }
     </style>
 </head>
@@ -283,152 +382,178 @@
         <!-- Contenedor del slider y el checkbox -->
         <div id="slider-container">
             <div id="temp-slider-wrapper">
-                <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0">
+                <input type="range" id="temp-slider" min="-1" max="4" step="0.01" value="0.1">
             </div>
             <div id="auto-scale-container">
                 <input type="checkbox" id="auto-scale-checkbox" checked>
                 <label for="auto-scale-checkbox">Autoescalado</label>
             </div>
         </div>
-        <!-- Texto desplegable debajo del slider -->
- 
-<details id="collapsible-text">
-    <summary>> Mostrar explicación</summary>
-    <p>
-        Esta simulación computa la capacidad calorífica por partícula (C<sub>V</sub>) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado.
-    </p>
-    <h3>• Gráfico superior</h3>
-    <p>
-        Muestra C<sub>V</sub>= (∂⟨E⟩/∂T)<sub>V</sub> en función de T, siendo ⟨E⟩ la energía media de la partícula. Las líneas horizontales punteadas representan los límites clásicos de C<sub>V</sub> para diferentes grados de libertad activos.     
-    </p>
-    <h4>Comportamiento con la temperatura</h4>
-    <p>
-        <strong>Bajas temperaturas:</strong> Solo los niveles traslacionales más bajos son accesibles debido a su menor separación energética. C<sub>V</sub> es bajo ya que solo estos niveles pueden almacenar energía.
-    </p>
-    <p>
-        <strong>Temperaturas intermedias:</strong> Los niveles rotacionales se vuelven accesibles, aumentando C<sub>V</sub> ya que más estados pueden almacenar energía con el mismo incremento de T.
-    </p>
-    <p>
-        <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando C<sub>V</sub> a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energia.
-    </p>
-    <h4>Límites clásicos</h4>
-    <p>
-        A altas temperaturas, C<sub>V</sub> se aproxima a los límites clásicos:
-    </p>
+        <!-- Contenedor de la explicación siempre visible -->
+        <div id="collapsible-text-container">
+            <!-- Agregar título de explicación -->
+            <h2>Explicación:</h2>
+            <div id="collapsible-text">
+                <!-- Contenido de la explicación -->
+                <p>
+                    Esta simulación computa la capacidad calorífica por partícula (\(C_V\)) de una molécula diatómica en función de la temperatura (T), demostrando la transición desde el comportamiento cuántico al clásico. La interacción con la simulación se realiza con el slider de temperatura y el botón de autoescalado que ajusta la escala de visualización. Ver limitaciones de este modelo al final del texto.
+                </p>
+                <h3>• Gráfico superior</h3>
+                <p>
+                    Muestra \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) en función de T, siendo \(\langle E \rangle\) la energía media de la partícula. Las líneas horizontales discontinuas representan los límites clásicos de \(C_V\) para diferentes grados de libertad activos.     
+                </p>
+                <h4>Comportamiento con la temperatura</h4>
+                <p>
+                    <strong>Bajas temperaturas:</strong> Solo los niveles traslacionales más bajos son accesibles debido a su menor separación energética. \(C_V\) es bajo ya que solo estos niveles pueden almacenar energía.
+                </p>
+                <p>
+                    <strong>Temperaturas intermedias:</strong> Los niveles rotacionales se vuelven accesibles, aumentando \(C_V\) ya que más estados pueden almacenar energía con el mismo incremento de T.
+                </p>
+                <p>
+                    <strong>Altas temperaturas:</strong> Los niveles vibracionales se activan, llevando \(C_V\) a su valor máximo cuando todos los grados de libertad están completamente disponibles para almacenar energía.
+                </p>
+                <h4>Límites clásicos</h4>
+                <p>
+                    A altas temperaturas, \(C_V\) se aproxima a los límites clásicos:
+                </p>
+                <ul>
+                    <li>\(\frac{3}{2} k_B\): Solo traslación activa</li>
+                    <li>\(\frac{5}{2} k_B\): Traslación y rotación activas</li>
+                    <li>\(\frac{7}{2} k_B\): Traslación, rotación y vibración activas</li>
+                </ul>
+                
+                <h3>• Gráfico inferior</h3>
+                <p>
+                    Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, \(e^{-E/k_BT}\).
+                </p>
+                
+                <p>
+                    El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de visualización de los niveles de energía:
+                </p>
+                <ul>
+                    <li>Activado: La escala de visualización se ajusta dinámicamente con la temperatura, manteniendo visible la línea \(k_BT\).</li>
+                    <li>Desactivado: La escala se fija (se congela la visualización de los niveles), permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
+                </ul>
+                
+                <h3>• Niveles de energía</h3>
+                <p>Los niveles de energía para cada modo se calculan como sigue:</p>
+                <ul>
+    <li>Traslacional (x3): \(E_n = \frac{n^2h^2}{8mL^2}\)
+        <br><br>
+        \(n\) = número cuántico (\(n \geq 1\), entero)
+        <br>\(h\) = constante de Planck
+        <br>\(m = 4.6517357770 \times 10^{-26}\) kg (masa de N₂)
+        <br>\(L = 0.5 \times 10^{-9}\) m (longitud de la caja)
+    </li>
+    <br>
+    <li>Rotacional: \(E_J = \frac{J(J+1)\hbar^2}{2I}\)
+        <br><br>
+        \(J\) = número cuántico rotacional (\(J \geq 0\), entero)
+        <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
+        <br>\(I = 1.4 \times 10^{-46}\) kg·m² (momento de inercia de N₂)
+    </li>
+    <br>
+    <li>Vibracional: \(E_n = \left(n + \frac{1}{2}\right)\hbar\omega\)
+        <br><br>
+        \(n\) = número cuántico vibracional (\(n \geq 0\), entero)
+        <br>\(\hbar = \frac{h}{2\pi}\) (constante de Planck reducida)
+        <br>\(\omega = 4.45 \times 10^{13}\) rad/s (frecuencia angular del oscilador para N₂)
+    </li>
+</ul>
+               
+                <p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de \(C_V\):</strong> En esta simulación, \(C_V = \left(\frac{\partial \langle E \rangle}{\partial T}\right)_V\) se aproxima numéricamente usando la fórmula:</p>
+                
+                <p style="font-size: 0.9em;">\[C_V = \frac{1}{k_B} \cdot \frac{3 \Delta E_{\text{trans}} + \Delta E_{\text{rot}} + \Delta E_{\text{vib}}}{\Delta T}\]</p>
+                
+                <p style="font-size: 0.9em;">Donde:</p>
+                <ul style="font-size: 0.9em;">
+                    <li>\(k_B\) es la constante de Boltzmann</li>
+                    <li>\(\Delta E = E[i] - E[i-1]\) (cambio en la energía promedio computado para cada modo (traslacional, rotacional, vibracional))</li>
+                    <li>\(\Delta T = T[i] - T[i-1]\) (cambio en la temperatura)</li>
+                    <li>i representa el índice de la temperatura en el array de temperaturas. \(T[i]\) y \(T[i-1]\) son dos temperaturas sucesivas.</li>
+                </ul>
+                
+                <p style="font-size: 0.9em;">Los promedios de energía para cada modo (traslacional, rotacional, vibracional) se calculan utilizando la distribución de Boltzmann:</p>
+                
+                <p style="font-size: 0.9em;">\[E_{\text{promedio}} = \frac{\sum_n E_n \exp\left(-\frac{E_n}{k_BT}\right)}{\sum_n \exp\left(-\frac{E_n}{k_BT}\right)}\]</p>
+                
+                <p style="font-size: 0.9em;">Donde \(E_n\) son los niveles de energía para cada modo, y la suma se realiza sobre todos los niveles considerados (cuantos más, mejor).</p>
+                <ul style="font-size: 0.9em;">
+                    <li>Traslacional (\(E_n = \frac{n^2h^2}{8mL^2}\)) : 1000 niveles (n = 1 a 1000)</li>
+                    <li>Rotacional (\(E_J = \frac{J(J+1)\hbar^2}{2I}\)) : 1001 niveles (J = 0 a 1000)</li>
+                    <li>Vibracional (\(E_n = \left(n + \frac{1}{2}\right)\hbar\omega\)) : 501 niveles (n = 0 a 500)</li>
+                </ul>
+                <p style="font-size: 0.9em;">Existe otra forma de calcular \(C_V\) utilizando las fluctuaciones de energía:</p>
+                
+                <p style="font-size: 0.9em;">\[C_V = \frac{1}{k_BT^2} \left(\langle E^2 \rangle - \langle E \rangle^2\right)\]</p>
+                
+                <p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
+
+<p style="font-size: 0.9em;"><strong> Limitaciones del modelo:</strong>
+<div style="font-size: 0.9em;">
+    <p>Este modelo, aunque útil para comprender el comportamiento general de la capacidad calorífica de moléculas diatómicas, tiene varias limitaciones importantes:</p>
     <ul>
-        <li>3/2 k<sub>B</sub>: Solo traslación activa</li>
-        <li>5/2 k<sub>B</sub>: Traslación y rotación activas</li>
-        <li>7/2 k<sub>B</sub>: Traslación, rotación y vibración activas</li>
-    </ul>
+        
+<li><strong>Gas ideal a baja presión:</strong> Se asume un gas a baja presión en un volumen fijo, lo cual puede no ser representativo de todas las condiciones experimentales.</li>
+        
+<li><strong>Fase gaseosa constante:</strong> Se supone que la molécula se mantiene en fase gaseosa en todo el rango de temperaturas.</li>
+       
+ <li><strong>No disociación:</strong> El modelo no considera la posibilidad de disociación molecular a altas temperaturas donde la molécula diatómica se rompería.</li>
+        
+<li><strong>Independencia de niveles energéticos:</strong> Se asume que los niveles energéticos (traslacional, rotacional y vibracional) son independientes entre sí. Esta aproximación es menos precisa a altas temperaturas, donde puede haber un acoplamiento significativo entre estos modos.</li>
+ <li><strong>Número fijo de niveles:</strong> Se utiliza un número fijo de niveles energéticos para cada modo, lo cual es una aproximación. En realidad el número de niveles accesibles aumenta con la temperatura.</li>
+        
+<li><strong>Simplificación de niveles traslacionales:</strong> Se utiliza una aproximación unidimensional (la que se visualiza) \(E_n = \frac{n^2h^2}{8mL^2}\), en lugar del cálculo 3D completo (\(E_{n_x,n_y,n_z} = \frac{h^2}{8mL^2}(n_x^2 + n_y^2 + n_z^2)\)). Esto reduce significativamente el costo computacional al generar menos niveles de energía (del orden de N en lugar de N³), y mejora la visualización al disminuir la densidad de niveles en el gráfico. Para el cómputo de \(C_V\) se considera \(3E_n\) para tener en cuenta la energía de los 3 modos traslacionales. Esta aproximación puede llevar a ligeras imprecisiones en \(C_V\) a temperaturas muy bajas debido a la menor densidad de niveles. Sin embargo, con este modelo, la separación entre niveles traslacionales sigue siendo mucho menor que la de los niveles rotacionales y vibracionales, manteniendo la curva \(C_V\) prácticamente idéntica al que se obtendría con el modelo 3D completo.</li>
+  
+<li><strong>Rotor rígido:</strong> El tratamiento de la molécula como un rotor rígido puede requerir correcciones a altas temperaturas donde la distorsión centrífuga se vuelve significativa.</li>
     
-    <h3>• Gráfico inferior</h3>
-    <p>
-        Visualiza los niveles cuánticos de energía traslacional, rotacional y vibracional. Las partículas se distribuyen en estos niveles según la probabilidad de ocupación dada por el factor de Boltzmann, e<sup>-E/k<sub>B</sub>T</sup>.
-    </p>
+<li><strong>Aproximación armónica:</strong> Para las vibraciones, se utiliza un modelo de oscilador armónico, que es menos preciso para niveles de energía altos. Un modelo más realista sería un oscilador anarmónico.</li>
+              
+<li><strong>Aproximación de Born-Oppenheimer:</strong> Esta aproximación asume que el movimiento de los electrones y los núcleos pueden tratarse por separado debido a la gran diferencia en sus masas. Permite simplificar significativamente los cálculos de estructura molecular y espectros vibracionales. Sin embargo, puede fallar en situaciones donde los estados electrónicos están muy próximos en energía o cuando hay fuertes acoplamientos vibrónico-electrónicos, como en ciertas reacciones químicas o en moléculas excitadas. En estos casos, los movimientos electrónicos y nucleares no pueden considerarse independientes, lo que puede afectar la precisión de los cálculos de energía y, por ende, la capacidad calorífica.</li>
+   
    
     
-        El <strong>botón de autoescalado</strong> ajusta dinámicamente la escala de energía del gráfico inferior:
-    
-    <ul>
-        <li>Activado: La escala se ajusta con la temperatura, manteniendo visible la línea k<sub>B</sub>T.</li>
-        <li>Desactivado: La escala se fija, permitiendo observar cómo los niveles de energía se llenan a medida que aumenta la temperatura.</li>
-    </ul>
-    
-    <h3>• Niveles de energía</h3>
-    <p>Los niveles de energía para cada modo se calculan como sigue:</p>
-    <ul>
-        <li>Traslacional: E<sub>{n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub>}</sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)
-        <br><br>
-        n<sub>x</sub>, n<sub>y</sub>, n<sub>z</sub> = números cuánticos ( n ≥ 1, enteros)
-        <br>h = constante de Planck
-        <br>m = 9.1093837 × 10<sup>-31</sup> kg (masa del electrón)
-        <br>L = 7 × 10<sup>-8</sup> m (longitud de la caja)
-        </li>
-        <br>
-        <li>Rotacional: E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)
-        <br><br>
-        J = número cuántico rotacional (J ≥ 0, entero)
-        <br>ℏ = h/2π (constante de Planck reducida)
-        <br>I = 2.2 × 10<sup>-46</sup> kg·m<sup>2</sup> (momento de inercia)
-        </li>
-        <br>
-        <li>Vibracional: E<sub>n</sub> = (n + ½)ℏω
-        <br><br>
-        n = número cuántico vibracional (n ≥ 0, entero)
-        <br>ℏ = h/2π (constante de Planck reducida)
-        <br>ω = 5 × 10<sup>13</sup> rad/s (frecuencia angular del oscilador)
-        </li>
-    </ul>
-
-    <p style="font-size: 0.9em;"><strong>Nota sobre los niveles de energía traslacional:</strong> En esta simulación, por motivos de eficiencia computacional y claridad visual, se ha adoptado una simplificación en el cálculo de los niveles de energía traslacional. En lugar de utilizar la ecuación tridimensional completa, se ha empleado el siguiente enfoque:</p>
-
-    <ol style="font-size: 0.9em;">
-        <li>Se calcula la energía en una dimensión usando la ecuación: E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)</li>
-        <li>Este resultado se multiplica por 3 para el computo de C<sub>V</sub>, asumiendo que las componentes x, y, y z son independientes.</li>
+          
+    <p>Referencias:</p>
+    <ol>
+        <li>McQuarrie, D. A. (2000). Statistical Mechanics. University Science Books.</li>
+        <li>Pathria, R. K., & Beale, P. D. (2011). Statistical Mechanics (3rd ed.). Academic Press.</li>
     </ol>
-
-    <p style="font-size: 0.9em;">Esta aproximación difiere del cálculo 3D riguroso, utilizando:</p>
-
-    <p style="font-size: 0.9em;">E<sub>n<sub>x</sub>,n<sub>y</sub>,n<sub>z</sub></sub> = (h<sup>2</sup>/(8mL<sup>2</sup>))(n<sub>x</sub><sup>2</sup> + n<sub>y</sub><sup>2</sup> + n<sub>z</sub><sup>2</sup>)</p>
-
-    <p style="font-size: 0.9em;">Las principales implicaciones de esta simplificación son:</p>
-
-    <ul style="font-size: 0.9em;">
-        <li><strong>Eficiencia computacional:</strong> Se genera un número significativamente menor de niveles de energía traslacional, lo que reduce drásticamente el costo computacional.</li>
-        <li><strong>Visualización:</strong> La menor densidad de niveles traslacionales permite una representación visual más clara y menos saturada. Solo se representan los niveles correspondientes a E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>).</li>
-        <li><strong>Precisión a bajas temperaturas:</strong> A temperaturas muy bajas, esta aproximación podría resultar en un C<sub>V</sub> ligeramente inferior al que se obtendría con el modelo 3D completo.</li>
-    </ul>
-    
-    <p style="font-size: 0.9em;">A pesar de la aproximación usada, la separacion entre niveles traslacionales sigue siendo significativamente menor que la separación entre niveles rotacionales y vibracionales. Por este motivo la curva C<sub>V</sub>  se mantiene prácticamente idéntica. Las discrepancias son visualmente imperceptibles en esta simulación y no afectan las conclusiones principales sobre el comportamiento termodinámico del sistema.</p>
-
-<p style="font-size: 0.9em;"><strong>Nota sobre el cálculo de C<sub>V</sub>:</strong> En esta simulación, C<sub>V</sub>= (∂⟨E⟩/∂T)<sub>V</sub> se aproxima numéricamente usando la fórmula:</p>
-
-<p style="font-size: 0.9em;">C<sub>V</sub> = (1 / k<sub>B</sub>) * (3 * ΔE<sub>trans</sub> + ΔE<sub>rot</sub> + ΔE<sub>vib</sub>) / ΔT</p>
-
-<p style="font-size: 0.9em;">Donde:</p>
-<ul style="font-size: 0.9em;">
-    <li>k<sub>B</sub> es la constante de Boltzmann</li>
-    <li>ΔE = E[i] - E[i-1] (cambio en la energía promedio computado para cada modo (traslacional, rotacional, vibracional) )</li>
-    <li>ΔT = T[i] - T[i-1] (cambio en la temperatura)</li>
-    <li>i representa el índice de la temperatura en el array de temperaturas. T[i] y T[i-1] son dos temperaturas sucesivas.</li>
-</ul>
-
-<p style="font-size: 0.9em;">Los promedios de energía para cada modo (traslacional, rotacional, vibracional) se calculan utilizando la distribución de Boltzmann:</p>
-
-<p style="font-size: 0.9em;">E<sub>promedio</sub> = Σ(E<sub>n</sub> * exp(-E<sub>n</sub>/(k<sub>B</sub>T))) / Σ(exp(-E<sub>n</sub>/(k<sub>B</sub>T)))</p>
-
-<p style="font-size: 0.9em;">Donde E<sub>n</sub> son los niveles de energía para cada modo, y la suma se realiza sobre todos los niveles considerados (cuantos más, mejor).</p>
-<ul style="font-size: 0.9em;">
-    <li>Traslacional (E<sub>n</sub> = (n<sup>2</sup>h<sup>2</sup>) / (8mL<sup>2</sup>)) : 1000 niveles (n = 1 a 1000)</li>
-    <li>Rotacional (E<sub>J</sub> = J(J+1)ℏ<sup>2</sup> / (2I)) : 1001 niveles (J = 0 a 1000)</li>
-    <li>Vibracional (E<sub>n</sub> = (n + ½)ℏω) : 501 niveles (n = 0 a 500)</li>
-</ul>
-<p style="font-size: 0.9em;">Existe otra forma de calcular C<sub>V</sub> utilizando las fluctuaciones de energía:</p>
-
-<p style="font-size: 0.9em;">C<sub>V</sub> = (1 / k<sub>B</sub>T<sup>2</sup>) * (⟨E<sup>2</sup>⟩ - ⟨E⟩<sup>2</sup>)</p>
-
-
-<p style="font-size: 0.9em;">Esta fórmula es equivalente a la derivada de la energía respecto a la temperatura.</p>
-
-
-</details>
-  
+</div>
+            </div>
+        </div>
     </div>
-<script>
-        // Constantes físicas
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false}
+                ]
+            });
+        });
+    </script>
+
+    <!-- Script JavaScript Completo -->
+    <script>
+        // Detección de dispositivo móvil (declarado como variable global)
+        var isMobile = window.matchMedia("(max-width: 600px)").matches;
+ // Constantes físicas actualizadas para N2
         const h = 6.62607015e-34;  // Constante de Planck
         const kB = 1.380649e-23;   // Constante de Boltzmann
-        const m = 9.1093837e-31;   // Masa del electrón
-        const L = 0.7e-7;          // Longitud de la caja
-        const I = 2.2e-46;         // Momento de inercia
-        const omega = 0.5e14;      // Frecuencia angular del oscilador armónico
+        const m = 28 * 1.66053906660e-27;  // Masa de N2 (28 u)
+        const L = 0.5e-9;          // Longitud de la caja (0.5 nm)
+        const I = 1.4e-46;         // Momento de inercia de N2
+        const omega = 4.45e13;     // Frecuencia angular del oscilador armónico para N2
 
-        // Rango de temperaturas
+        // Rango de temperaturas actualizado
         const temperatures = [];
-        for (let i = -1; i <= 4; i += 0.01) {
+        for (let i = -1; i <= 4; i += 0.01) {  // De 0.1 K a 10^4 K
             temperatures.push(Math.pow(10, i));
         }
-
         // Niveles de energía
         const n_trans_max = 1000;
         const j_rot_max = 1000;
@@ -490,8 +615,88 @@
             Cv_total.push(Cv / kB);
         }
 
-        // Obtener márgenes del gráfico de Plotly
-        let plotMargins = { t: 30, l: 60, r: 20, b: 50 };
+        // Definir los márgenes del gráfico en función del dispositivo
+        let plotMargins = isMobile ? { t: 5, l: 50, r: 30, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
+
+        // Definir el tamaño de fuente para las anotaciones
+        let annotationFontSize = isMobile ? 10 : 12;
+
+        // Función para obtener anotaciones según dispositivo
+        function getAnnotations() {
+            if (isMobile) {
+                return [
+                    {
+                        x: -0.02,
+                        y: 3.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>7/2 K<sub>B</sub></b>',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 2.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>5/2 K<sub>B</sub></b>',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 1.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>3/2 K<sub>B</sub></b>',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    }
+                ];
+            } else {
+                return [
+                    {
+                        x: -0.02,
+                        y: 3.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 2.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    },
+                    {
+                        x: -0.02,
+                        y: 1.5,
+                        xref: 'paper',
+                        yref: 'y',
+                        text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
+                        showarrow: false,
+                        font: { size: annotationFontSize },
+                        xanchor: 'left',
+                        yanchor: 'bottom'
+                    }
+                ];
+            }
+        }
 
         // Graficar Cv vs T
         let traceCv = {
@@ -509,7 +714,7 @@
                 type: 'line',
                 x0: 0.1,
                 y0: 3.5,
-                x1: 10000,
+                x1: 1e5,
                 y1: 3.5,
                 line: { dash: 'dash', width: 1, color: 'gray' }
             },
@@ -517,7 +722,7 @@
                 type: 'line',
                 x0: 0.1,
                 y0: 2.5,
-                x1: 10000,
+                x1: 1e5,
                 y1: 2.5,
                 line: { dash: 'dash', width: 1, color: 'gray' }
             },
@@ -525,7 +730,7 @@
                 type: 'line',
                 x0: 0.1,
                 y0: 1.5,
-                x1: 10000,
+                x1: 1e5,
                 y1: 1.5,
                 line: { dash: 'dash', width: 1, color: 'gray' }
             }
@@ -540,7 +745,8 @@
                 range: [-1, 4],
                 automargin: true,
                 showgrid: false,
-                fixedrange: true
+                fixedrange: true,
+                tickfont: { size: 12 }
             },
             yaxis: {
                 title: 'C<sub>V</sub>',
@@ -553,41 +759,7 @@
             },
             margin: plotMargins,
             shapes: horizontal_lines,
-            annotations: [
-                {
-                    x: -0.02,
-                    y: 3.5,
-                    xref: 'paper',
-                    yref: 'y',
-                    text:'<b>7/2 K<sub>B</sub></b>   (T+R+V activos)',
-                    showarrow: false,
-                    font: { size: 12 },
-                    xanchor: 'left',
-                    yanchor: 'bottom'
-                },
-                {
-                    x: -0.02,
-                    y: 2.5,
-                    xref: 'paper',
-                    yref: 'y',
-                    text:'<b>5/2 K<sub>B</sub></b>   (T+R activos)',
-                    showarrow: false,
-                    font: { size: 12 },
-                    xanchor: 'left',
-                    yanchor: 'bottom'
-                },
-                {
-                    x: -0.02,
-                    y: 1.5,
-                    xref: 'paper',
-                    yref: 'y',
-                    text:'<b>3/2 K<sub>B</sub></b>   (T activos)',
-                    showarrow: false,
-                    font: { size: 12 },
-                    xanchor: 'left',
-                    yanchor: 'bottom'
-                }
-            ]
+            annotations: getAnnotations()
         };
 
         let configCv = {
@@ -626,6 +798,11 @@
             .attr('height', '100%')
             .attr('preserveAspectRatio', 'xMidYMid meet');
 
+        // Crear grupos SVG para niveles, partículas y anotaciones
+        const levelsGroup = svg.append('g').attr('class', 'levels-group');
+        const particlesGroup = svg.append('g').attr('class', 'particles-group');
+        const annotationsGroup = svg.append('g').attr('class', 'annotations-group');
+
         // Escalas
         let xScale, yScale;
 
@@ -643,7 +820,7 @@
 
         function updateScales(E_max) {
             const plotWidth = document.getElementById('cv-plot').clientWidth;
-            const plotHeight = 300;
+            const plotHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--plot-height')); // Usar variable CSS
 
             const marginLeft = plotMargins.l;
             const marginRight = plotMargins.r;
@@ -692,7 +869,8 @@
         }
 
         function drawEnergyLevels(E_max) {
-            svg.selectAll('.energy-level').remove();
+            // Limpiar niveles de energía
+            levelsGroup.selectAll('.energy-level').remove();
 
             const totalWidth = 3;
             const groupGap = 0.2; // Espacio entre grupos
@@ -708,7 +886,7 @@
                 for (let n = 0; n < max_plot; n++) {
                     let yPosition = yScale(En[n]);
                     if (yPosition >= 30 && yPosition <= yScale.range()[0]) {
-                        svg.append('line')
+                        levelsGroup.append('line')
                             .attr('class', 'energy-level')
                             .attr('x1', xScale(start))
                             .attr('x2', xScale(start + groupWidth))
@@ -733,34 +911,36 @@
             drawLevels(En_rot, xPositions[1], j_rot_max_plot + 1);
             drawLevels(En_vib, xPositions[2], n_vib_max_plot + 1);
 
-            svg.selectAll('.label').remove();
+            // Limpiar etiquetas de modos
+            levelsGroup.selectAll('.label').remove();
 
-            const labelYPosition = yScale.range()[1] + 15;
+            const labelYPosition = yScale.range()[1] - 5;
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[0] + groupWidth / 2))
                 .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Traslacional (T)');
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[1] + groupWidth / 2))
                 .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Rotacional (R)');
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'label')
                 .attr('x', xScale(xPositions[2] + groupWidth / 2))
                 .attr('y', labelYPosition)
                 .attr('text-anchor', 'middle')
                 .text('Vibracional (V)');
 
-            svg.selectAll('.y-axis-label').remove();
+            // Limpiar etiquetas del eje Y
+            levelsGroup.selectAll('.y-axis-label').remove();
 
-            svg.append('text')
+            levelsGroup.append('text')
                 .attr('class', 'y-axis-label')
                 .attr('x', xScale(-0.2))
                 .attr('y', yScale(yScale.domain()[1] / 2))
@@ -769,8 +949,8 @@
                 .text('Energía');
 
             // Agregar el label de E = k_B T
-            svg.selectAll('.e-max-label').remove();
-            svg.selectAll('.e-max-arrow').remove();
+            annotationsGroup.selectAll('.e-max-label').remove();
+            annotationsGroup.selectAll('.e-max-arrow').remove();
 
             if (updateEmaxLabel) {
                 // Calcular E_label_energy = kB * currentT
@@ -787,15 +967,28 @@
                 let E_label_text_line2 = E_label_energy_KBT_formatted;
 
                 // Posicionar el label
-                let labelX = xScale(-0.253); // Posición fija para evitar vibración
-                let labelY = yScale(E_label_energy) -9; // Ajusta la posición vertical según sea necesario
+                let labelX;
+                let textAnchor;
+                let arrowDirection; // 'left' or 'right'
+
+                if (isMobile) {
+                    labelX = xScale(3.15); // Mover al margen derecho
+                    textAnchor = 'end'; // Alinear a la derecha
+                    arrowDirection = 'left';
+                } else {
+                    labelX = xScale(-0.253); // Posición original
+                    textAnchor = 'start'; // Alinear a la izquierda
+                    arrowDirection = 'right';
+                }
+
+                let labelY = yScale(E_label_energy) - 9; // Ajusta la posición vertical según sea necesario
 
                 // Agregar el texto en dos líneas con subíndice
-                let textElement = svg.append('text')
+                let textElement = annotationsGroup.append('text')
                     .attr('class', 'e-max-label')
                     .attr('x', labelX)
                     .attr('y', labelY)
-                    .attr('text-anchor', 'start')
+                    .attr('text-anchor', textAnchor)
                     .attr('font-size', '12px')
                     .attr('font-family', 'monospace');
 
@@ -810,22 +1003,50 @@
                     .html(E_label_text_line2.replace('K₍B₎T', 'K<tspan baseline-shift="sub">B</tspan>T'));
 
                 // Dibujar la flecha pequeña
-                let arrowX = labelX + 39; // Ajustar según sea necesario
-                let arrowY = labelY + 9;  // Centrar verticalmente entre las dos líneas
+                let arrowX, arrowY;
+                let arrowLength = 14; // Longitud de la flecha
+                let arrowOffset = 35; // Offset desde el texto
 
-                svg.append('line')
-                    .attr('class', 'e-max-arrow')
-                    .attr('x1', arrowX)
-                    .attr('y1', arrowY)
-                    .attr('x2', arrowX + 0)
-                    .attr('y2', arrowY)
-                    .attr('stroke', 'black')
-                    .attr('stroke-width', 0.5);
+                arrowY = labelY + 9;  // Centrar verticalmente entre las dos líneas
 
-                svg.append('polygon')
-                    .attr('class', 'e-max-arrow')
-                    .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
-                    .attr('fill', 'gray');
+                if (arrowDirection === 'right') {
+                    arrowX = labelX + arrowOffset; // Flecha hacia la derecha
+                    annotationsGroup.append('line')
+                        .attr('class', 'e-max-arrow')
+                        .attr('x1', arrowX)
+                        .attr('y1', arrowY)
+                        .attr('x2', arrowX + 0)
+                        .attr('y2', arrowY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 0.5);
+
+                    annotationsGroup.append('polygon')
+                        .attr('class', 'e-max-arrow')
+                        .attr('points', `${arrowX + 5},${arrowY - 3} ${arrowX + 5},${arrowY + 3} ${arrowX + 14},${arrowY}`)
+                        .attr('fill', 'gray');
+                } else if (arrowDirection === 'left') {
+                    arrowX = labelX - arrowOffset; // Flecha hacia la izquierda
+                    annotationsGroup.append('line')
+                        .attr('class', 'e-max-arrow')
+                        .attr('x1', arrowX)
+                        .attr('y1', arrowY)
+                        .attr('x2', arrowX - 0)
+                        .attr('y2', arrowY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 0.5);
+
+                    annotationsGroup.append('polygon')
+                        .attr('class', 'e-max-arrow')
+                        .attr('points', `${arrowX - 5},${arrowY - 3} ${arrowX - 5},${arrowY + 3} ${arrowX - 14},${arrowY}`)
+                        .attr('fill', 'gray');
+                }
+
+                // **Nuevo: Asegurar que las anotaciones estén por encima de las partículas**
+                // Al usar grupos separados y añadir anotaciones al final, ya deberían estar por encima.
+                // Sin embargo, para mayor seguridad, podemos ordenar los grupos en el SVG.
+                if (isMobile) {
+                    annotationsGroup.raise();
+                }
             }
 
             // Añadir la línea horizontal roja
@@ -865,7 +1086,8 @@
             let Z_vib = P_vib.reduce((a, b) => a + b, 0);
             P_vib = P_vib.map(p => p / Z_vib);
 
-            particles.forEach(p => p.remove());
+            // Limpiar partículas existentes
+            particlesGroup.selectAll('.particle').remove();
             particles = [];
 
             const totalWidth = 3;
@@ -892,7 +1114,7 @@
                         let y = yPosition;
                         let color = energyToColor(energy, yScale.domain()[1]);
 
-                        let particle = svg.append('circle')
+                        let particle = particlesGroup.append('circle')
                             .attr('class', 'particle')
                             .attr('cx', x)
                             .attr('cy', y)
@@ -965,8 +1187,28 @@
         tempSlider.addEventListener('input', updateTemperature);
         autoScaleCheckbox.addEventListener('change', updateAutoScale);
 
-        // Manejar redimensionamiento de ventana
+        // Manejar redimensionamiento de ventana para ajustar los márgenes y el tamaño de las anotaciones
         window.addEventListener('resize', () => {
+            // Actualizar la detección de dispositivo móvil
+            isMobile = window.matchMedia("(max-width: 600px)").matches;
+            annotationFontSize = isMobile ? 10 : 12;
+
+            // Actualizar los márgenes del gráfico
+            plotMargins = isMobile ? { t: 5, l: 60, r: 20, b: 50 } : { t: 30, l: 60, r: 20, b: 50 };
+
+            // Actualizar las anotaciones
+            layoutCv.annotations = getAnnotations();
+
+            // Actualizar el tamaño de fuente de las anotaciones
+            layoutCv.annotations.forEach(annotation => {
+                annotation.font.size = annotationFontSize;
+            });
+
+            // Actualizar el layout del gráfico
+            layoutCv.margin = plotMargins;
+
+            // Actualizar el gráfico
+            Plotly.relayout('cv-plot', layoutCv);
             Plotly.Plots.resize('cv-plot');
             updateEnergyLevels(); // Actualizar escalas y niveles de energía
         });
@@ -974,6 +1216,18 @@
         // Inicializar
         updateTemperature();
         updateAutoScale();
+
+        // Remover el evento 'toggle' de <details> ya que no se usa más
+        // Ya no es necesario, así que no se incluye
+
+        // Función para dibujar los niveles de energía inicialmente
+        function initializeEnergyLevels() {
+            updateEnergyLevels();
+            updateParticles(currentT);
+        }
+
+        // Llamar a la función de inicialización después de cargar todo
+        initializeEnergyLevels();
     </script>
 </body>
 </html>
